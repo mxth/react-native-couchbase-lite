@@ -1,19 +1,20 @@
-import * as React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import CouchbaseLite from 'react-native-couchbase-lite';
+import * as React from 'react'
+import { StyleSheet, View, Text } from 'react-native'
+import { CouchbaseLite, Database } from 'react-native-couchbase-lite'
+import { pipe } from 'fp-ts/lib/pipeable'
 
 export default function App() {
-  const [deviceName, setDeviceName] = React.useState('');
+  const [deviceName] = React.useState('')
 
   React.useEffect(() => {
-    CouchbaseLite.getDeviceName().then(setDeviceName);
-  }, []);
+    pipe(new Database('my-database'), CouchbaseLite._eval)
+  }, [])
 
   return (
     <View style={styles.container}>
       <Text>Device name: {deviceName}</Text>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -22,4 +23,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})

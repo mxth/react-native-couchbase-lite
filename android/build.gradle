@@ -8,7 +8,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.2.1'
+    classpath 'com.android.tools.build:gradle:3.6.1'
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
@@ -16,6 +16,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['CouchbaseLite_' + name]
@@ -29,7 +30,7 @@ android {
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
   buildToolsVersion getExtOrDefault('buildToolsVersion')
   defaultConfig {
-    minSdkVersion 16
+    minSdkVersion 24
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
     versionCode 1
     versionName "1.0"
@@ -52,6 +53,8 @@ repositories {
   mavenCentral()
   jcenter()
   google()
+  maven { url "https://mobile.maven.couchbase.com/maven2/dev/" }
+  maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
 
   def found = false
   def defaultDir = null
@@ -121,8 +124,15 @@ repositories {
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
 
+def arrow_version = "0.10.4"
+
 dependencies {
   // noinspection GradleDynamicVersion
   api 'com.facebook.react:react-native:+'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation "com.couchbase.lite:couchbase-lite-android-ee:2.7.0"
+
+  implementation "io.arrow-kt:arrow-fx:$arrow_version"
+  implementation "io.arrow-kt:arrow-syntax:$arrow_version"
+  kapt    "io.arrow-kt:arrow-meta:$arrow_version"
 }

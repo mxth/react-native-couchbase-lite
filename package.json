@@ -47,13 +47,16 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
-    "husky": "^4.0.1",
+    "fp-ts": "^2.5.3",
+    "io-ts": "^2.1.2",
     "jest": "^25.1.0",
     "prettier": "^1.19.1",
     "react": "~16.9.0",
     "react-native": "~0.61.5",
     "release-it": "^12.6.3",
-    "typescript": "^3.7.5"
+    "rxjs": "^6.5.4",
+    "typescript": "^3.7.5",
+    "zio": "file:./build/zio"
   },
   "peerDependencies": {
     "react": "*",
@@ -65,12 +68,6 @@
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "yarn lint && yarn typescript"
-    }
   },
   "eslintConfig": {
     "extends": [
@@ -84,12 +81,17 @@
           "singleQuote": true,
           "tabWidth": 2,
           "trailingComma": "es5",
-          "useTabs": false
+          "useTabs": false,
+          "semi": false,
+          "printWidth": 120
         }
       ]
     }
   },
-  "eslintIgnore": ["node_modules/", "lib/"],
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
   "prettier": {
     "singleQuote": true,
     "tabWidth": 2,
@@ -116,6 +118,10 @@
   "@react-native-community/bob": {
     "source": "src",
     "output": "lib",
-    "targets": ["commonjs", "module", "typescript"]
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
   }
 }

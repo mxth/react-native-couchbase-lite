@@ -9,12 +9,16 @@
     "start": "react-native start"
   },
   "dependencies": {
+    "fp-ts": "^2.5.3",
+    "io-ts": "^2.1.2",
     "react": "16.9.0",
-    "react-native": "0.61.5"
+    "react-native": "0.61.5",
+    "rxjs": "^6.5.4",
+    "zio": "file:../build/zio"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.4",
-    "@babel/runtime": "^7.8.4",
+    "@babel/core": "7.8.4",
+    "@babel/runtime": "7.8.4",
     "metro-react-native-babel-preset": "^0.58.0"
   }
 }
