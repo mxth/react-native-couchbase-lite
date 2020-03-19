@@ -1,7 +1,10 @@
 package com.reactnativecouchbaselite
 
+import arrow.core.Either
 import arrow.core.flatMap
 import com.couchbase.lite.CouchbaseLite
+import com.couchbase.lite.Replicator
+import com.couchbase.lite.TReplicatorType
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -9,7 +12,9 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReadableMap
 
 class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-
+  companion object {
+    val replicators: HashMap<String, Replicator> = hashMapOf()
+  }
   override fun getName(): String {
     return "CouchbaseLite"
   }
@@ -26,10 +31,8 @@ class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextB
   }
 
   @ReactMethod
-  fun eval(obj: ReadableMap, promise: Promise) {
-    RNObject.decode(obj)
-      .flatMap { when (it.tag) {
-        RNTag.Database -> RNDatabase.decode(it.source)
-      } }
+  fun startReplication(param: ReadableMap) {
+    Either.
   }
+
 }
