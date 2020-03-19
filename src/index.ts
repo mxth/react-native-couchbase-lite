@@ -1,6 +1,5 @@
 import { NativeModules } from 'react-native'
-import { ZIO } from 'zio/lib/ZIO'
-import { Task } from 'zio'
+import { Task } from 'fp-ts/lib/Task'
 
 enum RNTag {
   Database = 'Database',
@@ -31,6 +30,6 @@ export namespace CouchbaseLite {
   const native: CouchbaseLiteNative = NativeModules.CouchbaseLite
 
   export function _eval<A extends RNObject>(obj: A): Task<unknown> {
-    return ZIO.fromPromise(() => native.eval(obj))
+    return () => native.eval(obj)
   }
 }

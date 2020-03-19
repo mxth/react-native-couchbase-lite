@@ -7,7 +7,7 @@ export default function App() {
   const [deviceName] = React.useState('')
 
   React.useEffect(() => {
-    pipe(new Database('my-database'), CouchbaseLite._eval)
+    pipe(new Database('my-database'), CouchbaseLite._eval)()
   }, [])
 
   return (
