@@ -21,7 +21,8 @@
     "release": "release-it",
     "example": "yarn --cwd example",
     "pods": "cd example/ios && node -e \"process.exit(require('os').platform() === 'darwin')\" || pod install",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "bootstrap": "yarn example && yarn && yarn pods",
+    "postinstall": "patch-package"
   },
   "keywords": [
     "react-native",
@@ -48,19 +49,29 @@
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "fp-ts": "^2.5.3",
+    "immutable": "^4.0.0-rc.12",
     "io-ts": "^2.1.2",
+    "io-ts-types": "^0.5.6",
     "jest": "^25.1.0",
+    "patch-package": "^6.2.1",
+    "postinstall-postinstall": "^2.0.0",
     "prettier": "^1.19.1",
     "react": "~16.9.0",
     "react-native": "~0.61.5",
     "release-it": "^12.6.3",
     "rxjs": "^6.5.4",
     "typescript": "^3.7.5",
-    "zio": "file:./build/zio"
+    "zio": "./zio-v0.0.2.tgz"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "zio": "*",
+    "fp-ts": "*",
+    "immutable": "*",
+    "io-ts": "*",
+    "io-ts-types": "*",
+    "rxjs": "*"
   },
   "jest": {
     "preset": "react-native",

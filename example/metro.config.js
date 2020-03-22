@@ -14,6 +14,8 @@ const modules = [
   }),
 ]
 
+console.log(modules)
+
 module.exports = {
   projectRoot: __dirname,
   watchFolders: [root],

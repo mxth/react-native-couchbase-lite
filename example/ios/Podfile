@@ -37,4 +37,5 @@ target 'CouchbaseLiteExample' do
   pod 'react-native-couchbase-lite', :path => '../..'
 
   use_native_modules!
+
 end

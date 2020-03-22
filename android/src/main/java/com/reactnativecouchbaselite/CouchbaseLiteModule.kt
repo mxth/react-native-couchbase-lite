@@ -1,15 +1,16 @@
 package com.reactnativecouchbaselite
 
 import arrow.core.Either
+import arrow.core.extensions.either.foldable.fold
 import arrow.core.flatMap
-import com.couchbase.lite.CouchbaseLite
-import com.couchbase.lite.Replicator
-import com.couchbase.lite.TReplicatorType
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.ReadableMap
+import com.couchbase.lite.*
+import com.facebook.react.bridge.*
+
+private fun <A> Either<String, A>.foldUnit(promise: Promise): Unit =
+  this.fold(
+    { promise.reject(it, it) },
+    { promise.resolve(null) }
+  )
 
 class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   companion object {
@@ -26,13 +27,28 @@ class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextB
   // Example method
   // See https://facebook.github.io/react-native/docs/native-modules-android
   @ReactMethod
-  fun getDeviceName(promise: Promise) {
+  fun run(promise: Promise) {
     promise.resolve(android.os.Build.MODEL)
   }
 
   @ReactMethod
-  fun startReplication(param: ReadableMap) {
-    Either.
+  fun replicatorDebug(): Unit {
+    Database.setLogLevel(LogDomain.REPLICATOR, LogLevel.VERBOSE)
   }
 
+  @ReactMethod
+  fun replicatorInit(obj: ReadableMap, promise: Promise): Unit =
+    RNReplicatorConfiguration.decode(obj)
+      .flatMap { RNReplicator.init(it) }
+      .foldUnit(promise)
+
+  @ReactMethod
+  fun replicatorStart(database: String, promise: Promise): Unit =
+    RNReplicator.start(database)
+      .foldUnit(promise)
+
+  @ReactMethod
+  fun replicatorStop(database: String, promise: Promise): Unit =
+    RNReplicator.stop(database)
+      .foldUnit(promise)
 }
