@@ -10,4 +10,5 @@ class SafeReadableMap(private val map: ReadableMap) {
   fun getMap(name: String): Either<String, SafeReadableMap> =
     map.getMap(name).rightIfNotNull { "$name is null" }
       .map { SafeReadableMap(it) }
+  fun getBoolean(name: String): Boolean = map.getBoolean(name)
 }

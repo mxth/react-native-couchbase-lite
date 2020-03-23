@@ -1,2 +1,2 @@
 export * from './CouchbaseLite'
-export * from './Replicator'
+export * from './replicator'
