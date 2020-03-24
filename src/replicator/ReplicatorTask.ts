@@ -13,7 +13,7 @@ export namespace ReplicatorTask {
     }
   }
 
-  export type Payload = Debug | Init | Start | Stop | Status
+  export type Payload = Debug | Init | Start | Stop | Status | AddChangeListener
 
   export interface Debug {
     tag: 'debug'
@@ -52,5 +52,13 @@ export namespace ReplicatorTask {
   }
   export function Status(database: string): ReplicatorTask {
     return init({ tag: 'status', database })
+  }
+
+  export interface AddChangeListener {
+    tag: 'addChangeListener'
+    database: string
+  }
+  export function AddChangeListener(database: string): ReplicatorTask {
+    return init({ tag: 'addChangeListener', database })
   }
 }

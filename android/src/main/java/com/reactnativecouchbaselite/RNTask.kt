@@ -9,13 +9,13 @@ import com.facebook.react.bridge.WritableMap
 
 data class RNTask(val group: String, val payload: ReadableMap) {
   companion object {
-    fun run(obj: SafeReadableMap): Either<String, WritableMap> = obj
+    fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = obj
       .getString("group")
       .flatMap { group ->
         fun getPayload() = obj.getMap("payload")
         when (group) {
           "Replicator" -> getPayload().flatMap {
-            RNReplicator.run(it)
+            RNReplicator.run(it, eventEmitter)
           }
           else -> Either.left("unknown task group $group")
         }

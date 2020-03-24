@@ -12,11 +12,12 @@ class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextB
     CouchbaseLite.init(reactContext)
   }
 
+  val eventEmitter = EventEmitter(reactContext)
   // Example method
   // See https://facebook.github.io/react-native/docs/native-modules-android
   @ReactMethod
   fun run(obj: ReadableMap, promise: Promise) {
-    RNTask.run(SafeReadableMap(obj)).fold(
+    RNTask.run(SafeReadableMap(obj), eventEmitter).fold(
       { promise.reject(it, it) },
       { promise.resolve(it) }
     )
