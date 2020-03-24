@@ -9,24 +9,41 @@ type RNTask = {
 }
 
 export interface CouchbaseLite {
-  couchbase: CouchbaseLite.NativeModule
+  couchbase: CouchbaseLite.Service
 }
 
 export namespace CouchbaseLite {
+  export interface Service {
+    nativeModule: NativeModule
+    eventEmitter: Task<NativeEventEmitter>
+  }
+
   export type NativeModule = {
     run(task: RNTask): Promise<unknown>
     replicatorDebug(): void
   }
 
-  export const Native: Task<CouchbaseLite> = ZIO.effect(
+  export const live: Task<CouchbaseLite> = ZIO.effect(
     (): CouchbaseLite => ({
-      couchbase: NativeModules.CouchbaseLite,
+      couchbase: {
+        nativeModule: NativeModules.CouchbaseLite,
+        eventEmitter: ZIO.effect(() => new NativeEventEmitter(NativeModules.CouchbaseLite))
+      },
     })
   )
 
   export function run<T extends RNTask>(task: T) {
-    return ZIO.accessM((_: CouchbaseLite) => ZIO.fromPromise(() => _.couchbase.run(task)))
+    return ZIO.accessM((_: CouchbaseLite) => ZIO.fromPromise(() => _.couchbase.nativeModule.run(task)))
   }
+
+  export const eventEmitter = ZIO.accessM((_: CouchbaseLite) => _.couchbase.eventEmitter)
+
+  let counter = 0
+  export const nextCounter = ZIO.effectTotal(() => counter++)
+  export const nextId = pipe(
+    nextCounter,
+    ZIO.map(_ => _.toString())
+  )
 
   export function onEvent(eventType: string) {
     return ZStream.bracket(
