@@ -58,7 +58,7 @@ object RNReplicator {
 
         "addChangeListener" -> getReplicator()
           .map { replicator ->
-            replicator.addChangeListener()
+            replicator.add()
           }
 
         else -> Either.left("unknown replicator tag $tag")

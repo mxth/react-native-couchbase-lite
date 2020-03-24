@@ -13,7 +13,7 @@ export namespace ReplicatorTask {
     }
   }
 
-  export type Payload = Debug | Init | Start | Stop | Status | AddChangeListener
+  export type Payload = Debug | Init | Start | Stop | Status | AddChangeListener | RemoveChangeListener
 
   export interface Debug {
     tag: 'debug'
