@@ -57,8 +57,18 @@ export namespace ReplicatorTask {
   export interface AddChangeListener {
     tag: 'addChangeListener'
     database: string
+    eventId: string
   }
-  export function AddChangeListener(database: string): ReplicatorTask {
-    return init({ tag: 'addChangeListener', database })
+  export function AddChangeListener(database: string, eventId: string): ReplicatorTask {
+    return init({ tag: 'addChangeListener', database, eventId })
+  }
+
+  export interface RemoveChangeListener {
+    tag: 'removeChangeListener'
+    database: string
+    eventId: string
+  }
+  export function RemoveChangeListener(database: string, eventId: string): ReplicatorTask {
+    return init({ tag: 'removeChangeListener', database, eventId })
   }
 }

@@ -1,6 +1,6 @@
 export enum ActivityLevel {
-  Stopped = 'stopped',
-  Offline = 'offline',
-  Connecting = 'connecting',
-  Idle = 'idle',
+  Stopped = 'STOPPED',
+  Offline = 'OFFLINE',
+  Connecting = 'CONNECTING',
+  Idle = 'IDLE',
 }
