@@ -61,7 +61,7 @@
     "release-it": "^12.6.3",
     "rxjs": "^6.5.4",
     "typescript": "^3.7.5",
-    "zio": "./zio-v0.0.5.tgz"
+    "zio": "./zio-v0.0.6.tgz"
   },
   "peerDependencies": {
     "react": "*",

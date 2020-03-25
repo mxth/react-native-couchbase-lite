@@ -14,17 +14,30 @@ object RNReplicatorConfiguration {
       obj.getMap("authenticator").fold(
         { Either.right(null) },
         { RNAuthenticator.decode(it) }
+      ),
+      obj.getArray("channels").fold(
+        { Either.right(null) },
+        { it.toStringList() }
       )
     ).fix().map { tuple ->
       val database = RNDatabase.get(tuple.a)
       val endpoint = URLEndpoint(URI(tuple.b))
+      val replicatorType = tuple.c
+      val authenticator = tuple.d
+      val channels = tuple.e
+
       val config = ReplicatorConfiguration(database, endpoint)
 
-      config.replicatorType = tuple.c
+      config.replicatorType = replicatorType
       config.isContinuous = obj.getBoolean("continuous")
 
-      if (tuple.d != null) {
-        config.authenticator = tuple.d
+      println(channels)
+      if (channels != null) {
+        config.channels = channels
+      }
+
+      if (authenticator != null) {
+        config.authenticator = authenticator
       }
       config
     }

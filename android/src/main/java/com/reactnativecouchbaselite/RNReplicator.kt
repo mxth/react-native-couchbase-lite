@@ -21,7 +21,13 @@ object RNReplicator {
     result.putInt("total", status.progress.total.toInt())
     status.error.toOption().fold(
       { result.putNull("error") },
-      { result.putString("error", it.toString())}
+      { error ->
+        val errorMap = Arguments.createMap()
+        errorMap.putInt("code", error.code)
+        errorMap.putString("domain", error.domain)
+        errorMap.putString("message", error.localizedMessage)
+        result.putMap("error", errorMap)
+      }
     )
     return result
   }

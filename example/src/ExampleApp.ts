@@ -1,5 +1,5 @@
 import { CouchbaseLite } from 'react-native-couchbase-lite'
-import { Logging, logEffect } from 'zio/logging';
+import { Logging } from 'zio/logging';
 import { pipe } from 'fp-ts/lib/pipeable'
 import { Throwable, ZIO } from 'zio'
 import { Alert } from 'react-native'
@@ -23,7 +23,6 @@ export namespace ExampleApp {
   export function run<A>(zio: ZIO<ExampleApp, Throwable, A>) {
     return pipe(
       zio,
-      logEffect('ExampleApp.run'),
       ZIO.provideM(Live),
       ZIO.foldM(
         error => ZIO.effectTotal(() => Alert.alert('Error', error.message)),

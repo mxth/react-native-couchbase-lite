@@ -4872,4 +4872,4 @@ yargs@^9.0.0:
     yargs-parser "^7.0.0"
 
 zio@../node_modules/zio:
-  version "0.0.5"
+  version "0.0.6"

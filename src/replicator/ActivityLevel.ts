@@ -3,4 +3,5 @@ export enum ActivityLevel {
   Offline = 'OFFLINE',
   Connecting = 'CONNECTING',
   Idle = 'IDLE',
+  Busy = 'BUSY',
 }

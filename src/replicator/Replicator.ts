@@ -19,7 +19,11 @@ export const ReplicatorStatus = t.strict({
   activityLevel: enumC(ActivityLevel),
   completed: t.number,
   total: t.number,
-  error: t.union([t.string, t.null]),
+  error: t.union([t.type({
+    code: t.number,
+    domain: t.string,
+    message: t.string,
+  }), t.null]),
 })
 export type ReplicatorStatus = t.TypeOf<typeof ReplicatorStatus>
 
@@ -43,21 +47,21 @@ export namespace Replicator {
     return ZStream.bracket(
       pipe(
         ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
-        logEffect('onChange nextId'),
         ZIO.tap(([_, eventId]) => pipe(ReplicatorTask.AddChangeListener(database, eventId), CouchbaseLite.run)),
-        logEffect('onChange acquire')
+        logEffect('acquire')
       ),
       ([eventEmitter, eventId]) =>
         pipe(
           new Observable<E.Either<Throwable, ReplicatorStatus>>(observer => {
-            console.log('addListener')
             eventEmitter.addListener(eventId, event =>
               pipe(
                 event,
                 decode(ReplicatorStatus),
                 E.fold(
                   error => {
-                    observer.next(E.left(Throwable(`replicator status decode error: ${error.paths}`)))
+                    observer.next(E.left(
+                      Throwable(`replicator status decode error: ${error.paths} ${JSON.stringify(error.input)}`)
+                    ))
                   },
                   success => {
                     observer.next(E.right(success))
@@ -77,7 +81,7 @@ export namespace Replicator {
               eventEmitter.removeAllListeners(eventId)
             })
           ),
-          logEffect('onChange release')
+          logEffect('release')
         )
     )
   }
