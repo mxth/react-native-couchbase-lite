@@ -9516,6 +9516,6 @@ yargs@^9.0.0:
     y18n "^3.2.1"
     yargs-parser "^7.0.0"
 
-zio@./zio-v0.0.2.tgz:
-  version "0.0.2"
-  resolved "./zio-v0.0.2.tgz#758e735e95ff19e0f306ac26ba84cf3a884e547b"
+zio@./zio-v0.0.5.tgz:
+  version "0.0.5"
+  resolved "./zio-v0.0.5.tgz#b7de3d44c1cf0027f3bc2c3912bf2306eb8bcb46"

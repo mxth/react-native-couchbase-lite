@@ -9,6 +9,7 @@ import { ZStream } from 'zio/stream'
 import { decode, Throwable, ZIO } from 'zio'
 import { Observable } from 'rxjs'
 import * as E from 'fp-ts/lib/Either'
+import { Logging, logEffect } from 'zio/logging'
 
 export interface Replicator {
   config: ReplicatorConfiguration
@@ -38,35 +39,34 @@ export namespace Replicator {
   export function status(database: string) {
     return pipe(ReplicatorTask.Status(database), CouchbaseLite.run)
   }
-  export function onChange(database: string): ZStream<CouchbaseLite, Throwable, ReplicatorStatus> {
+  export function onChange(database: string): ZStream<CouchbaseLite & Logging, Throwable, ReplicatorStatus> {
     return ZStream.bracket(
-      ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
+      pipe(
+        ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
+        logEffect('onChange nextId'),
+        ZIO.tap(([_, eventId]) => pipe(ReplicatorTask.AddChangeListener(database, eventId), CouchbaseLite.run)),
+        logEffect('onChange acquire')
+      ),
       ([eventEmitter, eventId]) =>
         pipe(
-          ReplicatorTask.AddChangeListener(database, eventId),
-          CouchbaseLite.run,
-          ZStream.fromEffect,
-          ZStream.flatMap(_ =>
-            pipe(
-              new Observable<E.Either<Throwable, ReplicatorStatus>>(observer => {
-                eventEmitter.addListener(eventId.toString(), event =>
-                  pipe(
-                    event,
-                    decode(ReplicatorStatus),
-                    E.fold(
-                      error => {
-                        observer.next(E.left(Throwable(`replicator status decode error: ${error.paths}`)))
-                      },
-                      success => {
-                        observer.next(E.right(success))
-                      }
-                    )
-                  )
+          new Observable<E.Either<Throwable, ReplicatorStatus>>(observer => {
+            console.log('addListener')
+            eventEmitter.addListener(eventId, event =>
+              pipe(
+                event,
+                decode(ReplicatorStatus),
+                E.fold(
+                  error => {
+                    observer.next(E.left(Throwable(`replicator status decode error: ${error.paths}`)))
+                  },
+                  success => {
+                    observer.next(E.right(success))
+                  }
                 )
-              }),
-              ZStream.fromObservableEither
+              )
             )
-          )
+          }),
+          ZStream.fromObservableEither
         ),
       ([eventEmitter, eventId]) =>
         pipe(
@@ -76,7 +76,8 @@ export namespace Replicator {
             ZIO.effect(() => {
               eventEmitter.removeAllListeners(eventId)
             })
-          )
+          ),
+          logEffect('onChange release')
         )
     )
   }

@@ -1,10 +1,13 @@
 import * as React from 'react'
-import { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { Replicator, ReplicatorConfiguration, ReplicatorType } from 'react-native-couchbase-lite'
+import { useState, useEffect } from 'react'
+import { StyleSheet, View, Text } from 'react-native'
+import { Replicator, ReplicatorConfiguration, ReplicatorType, ReplicatorStatus } from 'react-native-couchbase-lite'
 import { Input, Button, CheckBox } from 'react-native-elements'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { ExampleApp } from './ExampleApp'
+import { ZStream } from 'zio/stream'
+import { Subject } from 'rxjs'
+import { take } from 'rxjs/operators'
 
 export default function App() {
   const [config, setConfig] = useState<ReplicatorConfiguration>({
@@ -15,34 +18,33 @@ export default function App() {
     authenticator: null,
   })
 
-  const debug = () =>
+  const [status, setStatus] = useState<ReplicatorStatus | null>(null)
+  const [interruptOnChange] = useState<Subject<void>>(new Subject())
+
+  useEffect(() => {
+    pipe(Replicator.debug(), ExampleApp.run)
+  }, [])
+
+  const addOnChange = () => {
     pipe(
-      Replicator.debug(),
+      Replicator.onChange(config.database),
+      ZStream.interruptWhen(pipe(interruptOnChange, take(1), _ => _.toPromise())),
+      ZStream.foreachFunction(setStatus),
       ExampleApp.run
     )
+  }
 
-  const status = () =>
-    pipe(
-      Replicator.status(config.database),
-      ExampleApp.run
-    )
+  const removeOnChange = () => {
+    interruptOnChange.next()
+  }
 
-  const initReplicator = () =>
-    pipe(
-      Replicator.init(config),
-      ExampleApp.run
-    )
+  const getStatus = () => pipe(Replicator.status(config.database), ExampleApp.run)
 
-  const startReplicator = () =>
-    pipe(
-      Replicator.start(config.database),
-      ExampleApp.run
-    )
+  const initReplicator = () => pipe(Replicator.init(config), ExampleApp.run)
 
-  const stopReplicator = () => pipe(
-    Replicator.stop(config.database),
-    ExampleApp.run
-  )
+  const startReplicator = () => pipe(Replicator.start(config.database), ExampleApp.run)
+
+  const stopReplicator = () => pipe(Replicator.stop(config.database), ExampleApp.run)
 
   return (
     <View style={styles.container}>
@@ -53,9 +55,17 @@ export default function App() {
         checked={config.continuous}
         onPress={() => setConfig({ ...config, continuous: !config.continuous })}
       />
-      <Button title="Debug replicator" onPress={debug} />
+      {status && (
+        <View>
+          <Text>activityLevel: {status.activityLevel}</Text>
+          <Text>completed: {status.completed}</Text>
+          <Text>total: {status.total}</Text>
+        </View>
+      )}
       <Button title="Init replicator" onPress={initReplicator} />
-      <Button title="Status replicator" onPress={status} />
+      <Button title="addOnChange" onPress={addOnChange} />
+      <Button title="removeOnChange" onPress={removeOnChange} />
+      <Button title="Get status replicator" onPress={getStatus} />
       <Button title="Start replicator" onPress={startReplicator} />
       <Button title="Stop replicator" onPress={stopReplicator} />
     </View>
