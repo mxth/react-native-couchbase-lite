@@ -1,5 +1,7 @@
 PODS:
   - boost-for-react-native (1.63.0)
+  - Bow (0.7.0)
+  - CouchbaseLite-Swift-Enterprise (2.7.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.61.5)
   - FBReactNativeSpec (0.61.5):
@@ -183,6 +185,8 @@ PODS:
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
   - react-native-couchbase-lite (0.1.0):
+    - Bow (= 0.7.0)
+    - CouchbaseLite-Swift-Enterprise (= 2.7.0)
     - React
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
@@ -258,6 +262,8 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - boost-for-react-native
+    - Bow
+    - CouchbaseLite-Swift-Enterprise
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -317,6 +323,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
+  Bow: 3561cae6b993e4c37f507e03dd89859538d8ec12
+  CouchbaseLite-Swift-Enterprise: 43472e7810b6ed30304c77f8cd00ceee6489d746
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
   FBLazyVector: aaeaf388755e4f29cd74acbc9e3b8da6d807c37f
   FBReactNativeSpec: 118d0d177724c2d67f08a59136eb29ef5943ec75
@@ -331,7 +339,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
-  react-native-couchbase-lite: 186052cb9c28875bacce5a4cea408894e8ac4731
+  react-native-couchbase-lite: 6e4ab2368de9a96ec1f1236f286ab67e55f3e558
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
