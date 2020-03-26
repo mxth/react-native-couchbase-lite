@@ -1,18 +1,12 @@
-#import "CouchbaseLite.h"
+#import <React/RCTBridgeModule.h>
+#import <React/RCTConvert.h>
 
-@implementation CouchbaseLite
+@interface RCT_EXTERN_MODULE(CouchbaseLite, NSObject)
 
-RCT_EXPORT_MODULE()
-
-// Example method
-// See // https://facebook.github.io/react-native/docs/native-modules-ios
-RCT_REMAP_METHOD(getDeviceName,
-                 findEventsWithResolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject)
-{
-  UIDevice *deviceInfo = [UIDevice currentDevice];
-
-  resolve(deviceInfo.name);
-}
+RCT_EXTERN_METHOD(
+                  run: (NSDictionary *)obj
+                  resolver: (RCTPromiseResolveBlock)resolve
+                  rejecter: (RCTPromiseRejectBlock)reject
+                  )
 
 @end
