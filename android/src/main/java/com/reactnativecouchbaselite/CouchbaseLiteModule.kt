@@ -13,6 +13,7 @@ class CouchbaseLiteModule(reactContext: ReactApplicationContext) : ReactContextB
   }
 
   private val eventEmitter = EventEmitter(reactContext)
+
   // Example method
   // See https://facebook.github.io/react-native/docs/native-modules-android
   @ReactMethod
