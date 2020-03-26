@@ -4,7 +4,6 @@ import arrow.core.*
 import arrow.core.extensions.either.applicative.applicative
 import com.couchbase.lite.*
 import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.WritableMap
 
 object RNReplicator {

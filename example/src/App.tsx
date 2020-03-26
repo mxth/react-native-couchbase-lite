@@ -8,8 +8,8 @@ import { ExampleApp } from './ExampleApp'
 import { ZStream } from 'zio/stream'
 import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
-import {locallyAnnotateName, log, logEffect} from "zio/logging";
-import {flow} from "fp-ts/lib/function";
+import { locallyAnnotateName, log, logEffect } from 'zio/logging'
+import { flow } from 'fp-ts/lib/function'
 
 function logEffectReplicator(task: string) {
   return flow(logEffect(task), locallyAnnotateName('replicator'))
@@ -22,7 +22,6 @@ export default function App() {
     continuous: true,
     replicatorType: ReplicatorType.PushAndPull,
     authenticator: null,
-    channels: ['public']
   })
 
   const [status, setStatus] = useState<ReplicatorStatus | null>(null)
@@ -35,10 +34,7 @@ export default function App() {
   const addOnChange = () => {
     pipe(
       Replicator.onChange(config.database),
-      ZStream.tap(_ => pipe(
-        log(_),
-        locallyAnnotateName('replicator', 'change')
-      )),
+      ZStream.tap(_ => pipe(log(_), locallyAnnotateName('replicator', 'change'))),
       ZStream.interruptWhen(pipe(interruptOnChange, take(1), _ => _.toPromise())),
       ZStream.foreachFunction(setStatus),
       ExampleApp.run
@@ -61,7 +57,11 @@ export default function App() {
     <View style={styles.container}>
       <Input label="database" value={config.database} onChangeText={database => setConfig({ ...config, database })} />
       <Input label="target" value={config.target} onChangeText={target => setConfig({ ...config, target })} />
-      <Input label="channels" value={config.channels?.join(',')} onChangeText={channels => setConfig({ ...config, channels: channels.split(',') })} />
+      <Input
+        label="channels"
+        value={config.channels?.join(',')}
+        onChangeText={channels => setConfig({ ...config, channels: channels.split(',') })}
+      />
       <CheckBox
         title="continuous"
         checked={config.continuous}
