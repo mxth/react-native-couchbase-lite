@@ -1,7 +1,7 @@
 class EventEmitter {
 
   /// Shared Instance.
-  public static var sharedInstance = EventEmitter()
+  public static let sharedInstance = EventEmitter()
 
   // ReactNativeEventEmitter is instantiated by React Native with the bridge.
   private static var eventEmitter: RCTEventEmitter!
@@ -21,7 +21,7 @@ class EventEmitter {
   lazy var allEvents: [String] = {
     var allEventNames: [String] = []
     
-    allEventNames.append("Replicator.Status")
+    allEventNames.append(RNReplicator.StatusEventType)
 
     return allEventNames
   }()

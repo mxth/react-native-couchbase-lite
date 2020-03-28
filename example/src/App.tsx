@@ -18,10 +18,9 @@ function logEffectReplicator(task: string) {
 export default function App() {
   const [config, setConfig] = useState<ReplicatorConfiguration>({
     database: 'agentapp',
-    target: 'ws://10.0.2.2:4984/agentapp',
+    target: 'ws://localhost:4984/agentapp',
     continuous: true,
     replicatorType: ReplicatorType.PushAndPull,
-    authenticator: null,
   })
 
   const [status, setStatus] = useState<ReplicatorStatus | null>(null)
@@ -74,12 +73,12 @@ export default function App() {
           <Text>total: {status.total}</Text>
         </View>
       )}
-      <Button title="Init replicator" onPress={initReplicator} />
-      <Button title="addOnChange" onPress={addOnChange} />
-      <Button title="removeOnChange" onPress={removeOnChange} />
-      <Button title="Get status replicator" onPress={getStatus} />
-      <Button title="Start replicator" onPress={startReplicator} />
-      <Button title="Stop replicator" onPress={stopReplicator} />
+      <Button title="REPLICATOR INIT" onPress={initReplicator} />
+      <Button title="REPLICATOR STATUS" onPress={getStatus} />
+      <Button title="ADD STATUS CHANGE" onPress={addOnChange} />
+      <Button title="START" onPress={startReplicator} />
+      <Button title="STOP" onPress={stopReplicator} />
+      <Button title="REMOVE STATUS CHANGE" onPress={removeOnChange} />
     </View>
   )
 }

@@ -6,7 +6,7 @@ export interface ReplicatorConfiguration {
   target: string
   replicatorType: ReplicatorType
   continuous: boolean
-  authenticator: Authenticator | null
+  authenticator?: Authenticator
   channels?: string[]
   headers?: Record<string, string>
 }

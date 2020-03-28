@@ -46,6 +46,8 @@ class RNReplicator {
     return result
   }
   
+  static let StatusEventType = "Replicator.Status"
+  
   static func writeStatusEvent(_ eventId: String, _ status: Replicator.Status) -> [AnyHashable: Any] {
     var result = SafeDictionary.empty()
     result["id"] = eventId
@@ -103,7 +105,8 @@ class RNReplicator {
             payload.getString("eventId"),
             { (replicator, eventId) in
               listenerTokens[eventId] = replicator.addChangeListener { change in
-                EventEmitter.sharedInstance.dispatch(name: "Replicator.Status", body: writeStatusEvent(eventId, change.status))
+                print("EventEmitter.sharedInstance.dispatch")
+                EventEmitter.sharedInstance.dispatch(name: StatusEventType, body: writeStatusEvent(eventId, change.status))
               }
               return SafeDictionary.empty()
             }

@@ -79,7 +79,6 @@ export namespace Replicator {
             CouchbaseLite.run
           )
         ),
-        logEffect('acquire')
       ),
       ([eventEmitter, eventId]) =>
         pipe(
@@ -95,6 +94,7 @@ export namespace Replicator {
                     )
                   },
                   success => {
+                    console.log(success)
                     observer.next(E.right(success))
                   }
                 )
