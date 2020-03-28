@@ -9,7 +9,7 @@ export namespace ReplicatorTask {
   function init(payload: Payload): ReplicatorTask {
     return {
       group: 'Replicator',
-      payload,
+      payload
     }
   }
 

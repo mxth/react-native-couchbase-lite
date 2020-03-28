@@ -28,7 +28,7 @@ export namespace CouchbaseLite {
       couchbase: {
         nativeModule: NativeModules.CouchbaseLite,
         eventEmitter: ZIO.effect(() => new NativeEventEmitter(NativeModules.CouchbaseLite))
-      },
+      }
     })
   )
 

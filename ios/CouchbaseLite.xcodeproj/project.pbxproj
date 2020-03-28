@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		15081D52242D18F800B16AD4 /* CouchbaseLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15081D51242D18F800B16AD4 /* CouchbaseLite.swift */; };
+		150DD2E8242F3ED5008637F1 /* ReactNativeEventEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 150DD2E7242F3ED5008637F1 /* ReactNativeEventEmitter.swift */; };
+		150DD2EA242F3F22008637F1 /* ReactNativeEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 150DD2E9242F3F22008637F1 /* ReactNativeEventEmitter.m */; };
+		150DD2EC242F3F62008637F1 /* EventEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 150DD2EB242F3F62008637F1 /* EventEmitter.swift */; };
 		15701F4D242DD2AB00EE2B36 /* RNTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15701F4C242DD2AB00EE2B36 /* RNTask.swift */; };
 		15701F4F242DD3B600EE2B36 /* SafeDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15701F4E242DD3B600EE2B36 /* SafeDictionary.swift */; };
 		15C70842242E53BE005F5A1C /* RNReplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C70841242E53BE005F5A1C /* RNReplicator.swift */; };
@@ -34,6 +37,9 @@
 		134814201AA4EA6300B7C361 /* libCouchbaseLite.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCouchbaseLite.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		15081D50242D18F800B16AD4 /* CouchbaseLite-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CouchbaseLite-Bridging-Header.h"; sourceTree = "<group>"; };
 		15081D51242D18F800B16AD4 /* CouchbaseLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouchbaseLite.swift; sourceTree = "<group>"; };
+		150DD2E7242F3ED5008637F1 /* ReactNativeEventEmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeEventEmitter.swift; sourceTree = "<group>"; };
+		150DD2E9242F3F22008637F1 /* ReactNativeEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactNativeEventEmitter.m; sourceTree = "<group>"; };
+		150DD2EB242F3F62008637F1 /* EventEmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEmitter.swift; sourceTree = "<group>"; };
 		15701F4C242DD2AB00EE2B36 /* RNTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNTask.swift; sourceTree = "<group>"; };
 		15701F4E242DD3B600EE2B36 /* SafeDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeDictionary.swift; sourceTree = "<group>"; };
 		15C70841242E53BE005F5A1C /* RNReplicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNReplicator.swift; sourceTree = "<group>"; };
@@ -66,6 +72,9 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				150DD2EB242F3F62008637F1 /* EventEmitter.swift */,
+				150DD2E9242F3F22008637F1 /* ReactNativeEventEmitter.m */,
+				150DD2E7242F3ED5008637F1 /* ReactNativeEventEmitter.swift */,
 				15C70849242E6898005F5A1C /* RNDatabase.swift */,
 				15C70847242E6219005F5A1C /* RNAuthenticator.swift */,
 				15C70845242E5FD6005F5A1C /* RNReplicatorType.swift */,
@@ -139,6 +148,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				15C70846242E5FD6005F5A1C /* RNReplicatorType.swift in Sources */,
+				150DD2EC242F3F62008637F1 /* EventEmitter.swift in Sources */,
 				15701F4F242DD3B600EE2B36 /* SafeDictionary.swift in Sources */,
 				15C70844242E5A8D005F5A1C /* RNReplicatorConfiguration.swift in Sources */,
 				15C70848242E6219005F5A1C /* RNAuthenticator.swift in Sources */,
@@ -146,6 +156,8 @@
 				15C7084A242E6898005F5A1C /* RNDatabase.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* CouchbaseLite.m in Sources */,
 				15081D52242D18F800B16AD4 /* CouchbaseLite.swift in Sources */,
+				150DD2EA242F3F22008637F1 /* ReactNativeEventEmitter.m in Sources */,
+				150DD2E8242F3ED5008637F1 /* ReactNativeEventEmitter.swift in Sources */,
 				15701F4D242DD2AB00EE2B36 /* RNTask.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
