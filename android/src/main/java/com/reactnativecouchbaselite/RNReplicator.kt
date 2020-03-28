@@ -31,6 +31,13 @@ object RNReplicator {
     return result
   }
 
+  private fun writeStatusEvent(eventId: String, status: AbstractReplicator.Status): WritableMap {
+    val result = Arguments.createMap()
+    result.putString("id", eventId)
+    result.putMap("status", writeStatus(status))
+    return result
+  }
+
   fun run(payload: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = payload
     .getString("tag")
     .flatMap { tag ->
@@ -72,24 +79,25 @@ object RNReplicator {
             val replicator = tuple.a
             val eventId = tuple.b
             listenerTokens[eventId] = replicator.addChangeListener { change ->
-              eventEmitter.sendEvent(eventId, writeStatus(change.status))
+              eventEmitter.sendEvent("Replicator.Status", writeStatusEvent(eventId, change.status))
             }
             Arguments.createMap()
           }
 
         "removeChangeListener" -> Either.applicative<String>().tupled(
           getReplicator(),
-          payload.getString("eventId").flatMap { eventId ->
+          payload.getString("eventId")
+        ).fix()
+          .flatMap { tuple ->
+            val replicator = tuple.a
+            val eventId = tuple.b
             listenerTokens[eventId].rightIfNotNull {
               "listenerToken for eventId $eventId not found"
+            }.map { token ->
+              replicator.removeChangeListener(token)
+              listenerTokens.remove(eventId)
+              Arguments.createMap()
             }
-          }
-        ).fix()
-          .map { tuple ->
-            val replicator = tuple.a
-            val token = tuple.b
-            replicator.removeChangeListener(token)
-            Arguments.createMap()
           }
 
         else -> Either.left("unknown replicator tag $tag")

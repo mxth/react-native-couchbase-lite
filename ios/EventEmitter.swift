@@ -21,8 +21,7 @@ class EventEmitter {
   lazy var allEvents: [String] = {
     var allEventNames: [String] = []
     
-    allEventNames.append("onQueryChange")
-    allEventNames.append("onReplicatorChange")
+    allEventNames.append("Replicator.Status")
 
     return allEventNames
   }()

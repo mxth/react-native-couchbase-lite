@@ -1,4 +1,4 @@
-import { NativeModules, NativeEventEmitter } from 'react-native'
+import { NativeModules, NativeEventEmitter, Platform } from 'react-native'
 import { Task, ZIO } from 'zio'
 import { ZStream } from 'zio/stream'
 import { pipe } from 'fp-ts/lib/pipeable'
@@ -27,7 +27,18 @@ export namespace CouchbaseLite {
     (): CouchbaseLite => ({
       couchbase: {
         nativeModule: NativeModules.CouchbaseLite,
-        eventEmitter: ZIO.effect(() => new NativeEventEmitter(NativeModules.CouchbaseLite))
+        eventEmitter: ZIO.effect(() => {
+          switch (Platform.OS) {
+            case 'ios': {
+              return new NativeEventEmitter(NativeModules.ReactNativeEventEmitter)
+            }
+            case 'android': {
+              return new NativeEventEmitter(NativeModules.CouchbaseLite)
+            }
+            default:
+              throw new Error(`unsupported platform: ${Platform.OS}`)
+          }
+        })
       }
     })
   )

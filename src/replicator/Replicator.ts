@@ -30,6 +30,14 @@ export const ReplicatorStatus = t.strict({
 })
 export type ReplicatorStatus = t.TypeOf<typeof ReplicatorStatus>
 
+const ReplicatorStatusEventType = 'Replicator.Status'
+
+export const ReplicatorStatusEvent = t.strict({
+  id: t.string,
+  status: ReplicatorStatus
+})
+export type ReplicatorStatusEvent = t.TypeOf<typeof ReplicatorStatusEvent>
+
 export namespace Replicator {
   export function debug() {
     return pipe(
@@ -75,11 +83,11 @@ export namespace Replicator {
       ),
       ([eventEmitter, eventId]) =>
         pipe(
-          new Observable<E.Either<Throwable, ReplicatorStatus>>(observer => {
-            eventEmitter.addListener(eventId, event =>
+          new Observable<E.Either<Throwable, ReplicatorStatusEvent>>(observer => {
+            eventEmitter.addListener(ReplicatorStatusEventType, event =>
               pipe(
                 event,
-                decode(ReplicatorStatus),
+                decode(ReplicatorStatusEvent),
                 E.fold(
                   error => {
                     observer.next(
@@ -93,7 +101,9 @@ export namespace Replicator {
               )
             )
           }),
-          ZStream.fromObservableEither
+          ZStream.fromObservableEither,
+          ZStream.filter(_ => _.id === eventId),
+          ZStream.map(_ => _.status)
         ),
       ([eventEmitter, eventId]) =>
         pipe(
@@ -101,7 +111,7 @@ export namespace Replicator {
           CouchbaseLite.run,
           ZIO.flatMap(_ =>
             ZIO.effect(() => {
-              eventEmitter.removeAllListeners(eventId)
+              eventEmitter.removeAllListeners(ReplicatorStatusEventType)
             })
           ),
           logEffect('release')

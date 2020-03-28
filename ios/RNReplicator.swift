@@ -46,6 +46,13 @@ class RNReplicator {
     return result
   }
   
+  static func writeStatusEvent(_ eventId: String, _ status: Replicator.Status) -> [AnyHashable: Any] {
+    var result = SafeDictionary.empty()
+    result["id"] = eventId
+    result["status"] = writeStatus(status)
+    return result
+  }
+  
   static func run(_ payload: SafeDictionary) -> Either<String, [AnyHashable: Any]> {
     return payload.getString("tag")
       .flatMap({ (tag) -> Either<String, [AnyHashable: Any]> in
@@ -90,6 +97,31 @@ class RNReplicator {
             .map({ $0.status })
             .map(writeStatus)^
           
+        case "addChangeListener":
+          return Either<String, [AnyHashable: Any]>.map(
+            getReplicator(),
+            payload.getString("eventId"),
+            { (replicator, eventId) in
+              listenerTokens[eventId] = replicator.addChangeListener { change in
+                EventEmitter.sharedInstance.dispatch(name: "Replicator.Status", body: writeStatusEvent(eventId, change.status))
+              }
+              return SafeDictionary.empty()
+            }
+          )^
+          
+        case "removeChangeListener":
+          return Either<String, [AnyHashable: Any]>.map(
+            getReplicator(),
+            payload.getString("eventId"),
+            { (replicator, eventId) in
+              listenerTokens[eventId].rightIfNotNull("listenerToken for eventId \(eventId) not found")
+                .map({ token in
+                  replicator.removeChangeListener(withToken: token)
+                  listenerTokens.removeValue(forKey: eventId)
+                  return SafeDictionary.empty()
+                })
+            }
+            ).flatMap({ $0 })^
         default:
           return Either.left("unknown replicator tag \(tag)")
         }
