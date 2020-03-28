@@ -16,7 +16,6 @@ class SafeDictionary {
   }
   
   func getDict(_ name: String) -> Either<String, SafeDictionary> {
-    print(name)
     return dict[name]
       .rightIfNotNull("\(name) is null")
       .filterOrElse({ !($0 is NSNull) }, "\(name) is null")

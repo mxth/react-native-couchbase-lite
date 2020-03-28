@@ -1,7 +1,7 @@
 import Bow
 
 class RNTask {
-  static func run(_ obj: SafeDictionary) -> Either<String, [AnyHashable: Any]> {
+  static func run(_ obj: SafeDictionary, _ eventEmitter: RCTEventEmitter) -> Either<String, [AnyHashable: Any]> {
     return obj.getString("group")
     .flatMap({ group in
       func getPayload() -> Either<String, SafeDictionary> {
@@ -9,7 +9,7 @@ class RNTask {
       }
       switch group {
       case "Replicator":
-        return getPayload().flatMap({ RNReplicator.run($0) })
+        return getPayload().flatMap({ RNReplicator.run($0, eventEmitter) })
       default:
         return Either.left("unknown task group \(group)")
       }

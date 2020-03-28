@@ -34,7 +34,7 @@ class RNReplicator {
     result["total"] = status.progress.total
     
     (status.error as NSError?).toOption().fold(
-      { result["error"] = nil },
+      { result["error"] = NSNull() },
       { error in
         var errorMap = SafeDictionary.empty()
         errorMap["code"] = error.code
@@ -46,7 +46,7 @@ class RNReplicator {
     return result
   }
   
-  static let StatusEventType = "Replicator.Status"
+  static let StatusEventName = "Replicator.Status"
   
   static func writeStatusEvent(_ eventId: String, _ status: Replicator.Status) -> [AnyHashable: Any] {
     var result = SafeDictionary.empty()
@@ -55,7 +55,7 @@ class RNReplicator {
     return result
   }
   
-  static func run(_ payload: SafeDictionary) -> Either<String, [AnyHashable: Any]> {
+  static func run(_ payload: SafeDictionary, _ eventEmitter: RCTEventEmitter) -> Either<String, [AnyHashable: Any]> {
     return payload.getString("tag")
       .flatMap({ (tag) -> Either<String, [AnyHashable: Any]> in
         func getReplicator() -> Either<String, Replicator> {
@@ -105,8 +105,8 @@ class RNReplicator {
             payload.getString("eventId"),
             { (replicator, eventId) in
               listenerTokens[eventId] = replicator.addChangeListener { change in
-                print("EventEmitter.sharedInstance.dispatch")
-                EventEmitter.sharedInstance.dispatch(name: StatusEventType, body: writeStatusEvent(eventId, change.status))
+                print("eventEmitter.sendEvent")
+                eventEmitter.sendEvent(withName: StatusEventName, body: writeStatusEvent(eventId, change.status))
               }
               return SafeDictionary.empty()
             }
