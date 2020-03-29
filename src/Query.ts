@@ -5,6 +5,7 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import * as O from 'fp-ts/lib/Option'
 import { CouchbaseLite } from './CouchbaseLite'
 import { Any, Throwable, UIO, ZIO } from 'zio'
+import { Option } from 'fp-ts/lib/Option'
 
 export type Query =
   | Query.Select
@@ -16,7 +17,10 @@ export interface QueryTask {
   payload: QueryTask.Payload
 }
 export namespace QueryTask {
-  export type Payload = Execute | Explain
+  export type Payload =
+    | Execute
+    | Explain
+    | AddChangeListener
 
   export function init(payload: Payload): QueryTask {
     return {
@@ -47,21 +51,35 @@ export namespace QueryTask {
     })
   }
 
+  export interface AddChangeListener {
+    tag: 'AddChangeListener'
+    query: Query
+    queryId: string
+  }
+  export function addChangeListener(query: Query, queryId: string): QueryTask {
+    return init({
+      tag: 'AddChangeListener',
+      query,
+      queryId
+    })
+  }
+
   const queryIds = new Map<Query, string>()
 
-  export function getQueryId(query: Query): UIO<string> {
+  export function nextQueryId(query: Query) {
+    return pipe(
+      CouchbaseLite.nextId,
+      ZIO.tap(id => ZIO.effectTotal(() => {
+        queryIds.set(query, id)
+      }))
+    )
+  }
+
+  export function getQueryId(query: Query): UIO<Option<string>> {
     return pipe(
       queryIds.get(query),
       O.fromNullable,
-      O.fold(
-        () => pipe(
-          CouchbaseLite.nextId,
-          ZIO.tap(id => ZIO.effectTotal(() => {
-            queryIds.set(query, id)
-          }))
-        ),
-        ZIO.succeed
-      )
+      ZIO.succeed
     )
   }
 }
@@ -79,6 +97,20 @@ export namespace Query {
       query,
       QueryTask.explain,
       CouchbaseLite.run
+    )
+  }
+  export function addChangeListener(query: Query) {
+    return pipe(
+      query,
+      QueryTask.getQueryId,
+      ZIO.flatMap(O.fold(
+        () => QueryTask.nextQueryId(query),
+        ZIO.succeed
+      )),
+      ZIO.flatMap(queryId => pipe(
+        QueryTask.addChangeListener(query, queryId),
+        CouchbaseLite.run
+      ))
     )
   }
 

@@ -11,6 +11,7 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.WritableNativeArray
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.reactnativecouchbaselite.EventEmitter
 import com.reactnativecouchbaselite.RNDataSource
 import com.reactnativecouchbaselite.RNExpression
 import com.reactnativecouchbaselite.RNSelectResult
@@ -18,14 +19,14 @@ import org.json.JSONException
 import org.json.JSONObject
 
 object RNQuery {
-  fun run(obj: SafeReadableMap): Either<String, WritableMap> = RNTag.get(obj)
+  private val listenerTokens: HashMap<String, ListenerToken> = hashMapOf()
+
+  fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = RNTag.get(obj)
     .flatMap { tag -> when (tag) {
       "Execute" -> obj.getMap("query")
         .flatMap { RNQuery.decode(it) }
-        .map { query ->
-          val data = Arguments.createMap()
-          data.putArray("result", writeResultSet(query.execute()))
-          data
+        .map {
+          writeResultSet(it.execute())
         }
 
       "Explain" -> obj.getMap("query")
@@ -35,6 +36,18 @@ object RNQuery {
           data.putString("explain", query.explain())
           data
         }
+
+      "AddChangeListener" -> Either.applicative<String>().tupled(
+        obj.getMap("query").flatMap { RNQuery.decode(it) },
+        obj.getString("queryId")
+      ).fix().map { tuple ->
+        val query = tuple.a
+        val queryId = tuple.b
+        listenerTokens[queryId] = query.addChangeListener { change ->
+          eventEmitter.sendEvent("Query.Change", writeResultSet(change.results))
+        }
+        Arguments.createMap()
+      }
 
       else -> Either.left("$tag is not RNQuery task")
     } }
@@ -75,7 +88,7 @@ object RNQuery {
     ).fix()
       .map { it.a.where(it.b) }
 
-  private fun writeResultSet(a: ResultSet): WritableArray {
+  private fun writeResultSet(a: ResultSet): WritableMap {
     val builder = GsonBuilder()
     val defaultBuilder: Gson = builder.create()
 
@@ -91,6 +104,8 @@ object RNQuery {
       }
     }
 
-    return array
+    val map = Arguments.createMap()
+    map.putArray("result", array)
+    return map
   }
 }

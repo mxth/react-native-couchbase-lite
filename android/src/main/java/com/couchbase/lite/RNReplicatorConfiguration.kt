@@ -31,7 +31,6 @@ object RNReplicatorConfiguration {
       config.replicatorType = replicatorType
       config.isContinuous = obj.getBoolean("continuous")
 
-      println(channels)
       if (channels != null) {
         config.channels = channels
       }
