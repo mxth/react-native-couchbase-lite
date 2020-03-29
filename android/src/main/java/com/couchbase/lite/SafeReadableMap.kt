@@ -17,6 +17,13 @@ class SafeReadableMap(private val map: ReadableMap) {
       Either.left("$name is undefined")
     }
 
+  fun getNumber(name: String): Either<String, Number> =
+    try {
+      map.getDouble(name).rightIfNotNull { "$name is null" }
+    } catch (e: NoSuchKeyException) {
+      Either.left("$name is undefined")
+    }
+
   fun getMap(name: String): Either<String, SafeReadableMap> =
     try {
       map.getMap(name).rightIfNotNull { "$name is null" }
@@ -36,5 +43,7 @@ class SafeReadableMap(private val map: ReadableMap) {
       Either.left("$name is undefined")
     }
 
-  fun getListString(name: String) = getArray(name).flatMap { it.toStringList() }
+  fun getListString(name: String) = getArray(name).flatMap { it.toListString() }
+
+  fun getListMap(name: String) = getArray(name).flatMap { it.toListMap() }
 }

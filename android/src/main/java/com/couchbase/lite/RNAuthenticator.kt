@@ -8,7 +8,7 @@ import com.facebook.react.bridge.ReadableMap
 
 object RNAuthenticator {
   fun decode(obj: SafeReadableMap): Either<String, Authenticator> =
-    obj.getString("tag")
+    RNTag.get(obj)
       .flatMap { tag -> when (tag) {
         "BasicAuthenticator" -> Either.applicative<String>().tupled(
           obj.getString("username"),

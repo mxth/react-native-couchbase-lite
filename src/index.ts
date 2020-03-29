@@ -1,2 +1,7 @@
 export * from './CouchbaseLite'
 export * from './replicator'
+export * from './Query'
+export * from './SelectResult'
+export * from './DataSource'
+export * from './Expression'
+export * from './Database'

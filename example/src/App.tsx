@@ -1,7 +1,13 @@
 import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { StyleSheet, View, Text } from 'react-native'
-import { Replicator, ReplicatorConfiguration, ReplicatorType, ReplicatorStatus } from 'react-native-couchbase-lite'
+import {
+  Replicator,
+  ReplicatorConfiguration,
+  ReplicatorType,
+  ReplicatorStatus,
+  SelectResult, DataSource, Expression
+} from 'react-native-couchbase-lite'
 import { Input, Button, CheckBox } from 'react-native-elements'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { ExampleApp } from './ExampleApp'
@@ -10,6 +16,8 @@ import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { locallyAnnotateName, log, logEffect } from 'zio/logging'
 import { flow } from 'fp-ts/lib/function'
+import { Query } from '../../src/Query'
+import { Database } from '../../src/Database'
 
 function logEffectReplicator(task: string) {
   return flow(logEffect(task), locallyAnnotateName('replicator'))
@@ -18,9 +26,10 @@ function logEffectReplicator(task: string) {
 export default function App() {
   const [config, setConfig] = useState<ReplicatorConfiguration>({
     database: 'agentapp',
-    target: 'ws://localhost:4984/agentapp',
+    target: 'ws://10.0.2.2:4984/agentapp',
     continuous: true,
     replicatorType: ReplicatorType.PushAndPull,
+    channels: ['!']
   })
 
   const [status, setStatus] = useState<ReplicatorStatus | null>(null)
@@ -52,6 +61,30 @@ export default function App() {
 
   const stopReplicator = () => pipe(Replicator.stop(config.database), logEffectReplicator('stop'), ExampleApp.run)
 
+  const query = pipe(
+    Query.select(
+      SelectResult.all()
+    ),
+    Query.from(pipe(
+      Database.init(config.database),
+      DataSource.database
+    )),
+    Query.where(pipe(
+      Expression.property('typekey'),
+      Expression.equalTo('Redemption')
+    )),
+  )
+  const simpleQuery = () => pipe(
+    query,
+    Query.execute,
+    ExampleApp.run
+  )
+  const explainQuery = () => pipe(
+    query,
+    Query.explain,
+    ExampleApp.run
+  )
+
   return (
     <View style={styles.container}>
       <Input label="database" value={config.database} onChangeText={database => setConfig({ ...config, database })} />
@@ -73,12 +106,21 @@ export default function App() {
           <Text>total: {status.total}</Text>
         </View>
       )}
-      <Button title="REPLICATOR INIT" onPress={initReplicator} />
-      <Button title="REPLICATOR STATUS" onPress={getStatus} />
-      <Button title="ADD STATUS CHANGE" onPress={addOnChange} />
-      <Button title="START" onPress={startReplicator} />
-      <Button title="STOP" onPress={stopReplicator} />
-      <Button title="REMOVE STATUS CHANGE" onPress={removeOnChange} />
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
+        <View>
+          <Button title="INIT" onPress={initReplicator} />
+          <Button title="ADD LISTENER" onPress={addOnChange} />
+          <Button title="START" onPress={startReplicator} />
+          <Button title="STOP" onPress={stopReplicator} />
+          <Button title="REMOVE LISTENER" onPress={removeOnChange} />
+          <Button title="STATUS" onPress={getStatus} />
+        </View>
+        <View>
+          <Button title="QUERY" onPress={simpleQuery} />
+          <Button title="EXPLAIN" onPress={explainQuery} />
+        </View>
+      </View>
+
     </View>
   )
 }

@@ -17,7 +17,7 @@ object RNReplicatorConfiguration {
       ),
       obj.getArray("channels").fold(
         { Either.right(null) },
-        { it.toStringList() }
+        { it.toListString() }
       )
     ).fix().map { tuple ->
       val database = RNDatabase.get(tuple.a)

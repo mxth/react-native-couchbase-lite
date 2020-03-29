@@ -38,12 +38,11 @@ object RNReplicator {
     return result
   }
 
-  fun run(payload: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = payload
-    .getString("tag")
+  fun run(payload: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = RNTag.get(payload)
     .flatMap { tag ->
       fun getReplicator() = payload.getString("database")
         .flatMap { getOne(it) }
-      when(tag) {
+      when (tag) {
         "debug" -> {
           Database.setLogLevel(LogDomain.REPLICATOR, LogLevel.VERBOSE)
           Either.right(Arguments.createMap())
