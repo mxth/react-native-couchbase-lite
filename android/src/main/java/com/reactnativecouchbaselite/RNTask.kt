@@ -18,7 +18,7 @@ data class RNTask(val group: String, val payload: ReadableMap) {
             RNReplicator.run(it, eventEmitter)
           }
           "Query" -> getPayload().flatMap {
-            RNQuery.run(it)
+            RNQuery.run(it, eventEmitter)
           }
           else -> Either.left("unknown task group $group")
         }

@@ -6,7 +6,7 @@ import {
   ReplicatorConfiguration,
   ReplicatorType,
   ReplicatorStatus,
-  SelectResult, DataSource, Expression
+  SelectResult, DataSource, Expression, Database
 } from 'react-native-couchbase-lite'
 import { Input, Button, CheckBox } from 'react-native-elements'
 import { pipe } from 'fp-ts/lib/pipeable'
@@ -16,8 +16,9 @@ import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { locallyAnnotateName, log, logEffect } from 'zio/logging'
 import { flow } from 'fp-ts/lib/function'
+import * as t from 'io-ts'
 import { Query } from '../../src/Query'
-import { Database } from '../../src/Database'
+import { ZIO } from 'zio'
 
 function logEffectReplicator(task: string) {
   return flow(logEffect(task), locallyAnnotateName('replicator'))
@@ -34,6 +35,7 @@ export default function App() {
 
   const [status, setStatus] = useState<ReplicatorStatus | null>(null)
   const [interruptOnChange] = useState<Subject<void>>(new Subject())
+  const [interruptLiveQuery] = useState<Subject<void>>(new Subject())
 
   useEffect(() => {
     pipe(Replicator.debug(), logEffectReplicator('debug'), ExampleApp.run)
@@ -42,9 +44,12 @@ export default function App() {
   const addOnChange = () => {
     pipe(
       Replicator.onChange(config.database),
-      ZStream.tap(_ => pipe(log(_), locallyAnnotateName('replicator', 'change'))),
       ZStream.interruptWhen(pipe(interruptOnChange, take(1), _ => _.toPromise())),
-      ZStream.foreachFunction(setStatus),
+      ZStream.foreach(status => pipe(
+        ZIO.effectTotal(() => setStatus(status)),
+        ZIO.flatMap(_ =>
+          pipe(log(status), locallyAnnotateName('replicator', 'change')))
+      )),
       ExampleApp.run
     )
   }
@@ -76,13 +81,24 @@ export default function App() {
   )
   const simpleQuery = () => pipe(
     query,
-    Query.execute,
+    Query.execute(t.unknown),
     ExampleApp.run
   )
   const explainQuery = () => pipe(
     query,
     Query.explain,
     ExampleApp.run
+  )
+  const liveQuery = () => pipe(
+    query,
+    Query.executeLive(t.unknown),
+    ZStream.interruptWhen(pipe(interruptLiveQuery, take(1), _ => _.toPromise())),
+    ZStream.foreach(_ => pipe(log(_), locallyAnnotateName('query', 'change'))),
+    ExampleApp.run
+  )
+
+  const stopQuery = () => pipe(
+    interruptLiveQuery.next()
   )
 
   return (
@@ -117,6 +133,8 @@ export default function App() {
         </View>
         <View>
           <Button title="QUERY" onPress={simpleQuery} />
+          <Button title="LIVE QUERY" onPress={liveQuery} />
+          <Button title="STOP QUERY" onPress={stopQuery} />
           <Button title="EXPLAIN" onPress={explainQuery} />
         </View>
       </View>

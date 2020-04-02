@@ -46,21 +46,20 @@ export namespace CouchbaseLite {
   )
 
   export function onEvent(eventType: string) {
-    return ZStream.bracket(
-      ZIO.effect(() => new NativeEventEmitter(NativeModules.CouchbaseLite)),
-      eventEmitter =>
-        pipe(
-          new Observable(observer => {
-            eventEmitter.addListener(eventType, event => {
-              observer.next(event)
-            })
-          }),
-          ZStream.fromObservable
-        ),
-      eventEmitter =>
-        ZIO.effect(() => {
-          eventEmitter.removeCurrentListener()
-        })
+    return pipe(
+      CouchbaseLite.eventEmitter,
+      ZStream.fromEffect,
+      ZStream.flatMap(eventEmitter => pipe(
+        new Observable(observer => {
+          eventEmitter.addListener(eventType, event => {
+            observer.next(event)
+          })
+          return () => {
+            eventEmitter.removeCurrentListener()
+          }
+        }),
+        ZStream.fromObservable
+      ))
     )
   }
 }

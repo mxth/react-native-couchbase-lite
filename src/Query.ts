@@ -2,25 +2,22 @@ import { SelectResult } from './SelectResult'
 import { DataSource } from './DataSource'
 import { Expression } from './Expression'
 import { pipe } from 'fp-ts/lib/pipeable'
-import * as O from 'fp-ts/lib/Option'
 import { CouchbaseLite } from './CouchbaseLite'
-import { Any, Throwable, UIO, ZIO } from 'zio'
-import { Option } from 'fp-ts/lib/Option'
+import { Any, decode, Throwable, ZIO } from 'zio'
+import { ZStream } from 'zio/stream'
+import { Observable } from 'rxjs'
+import * as E from 'fp-ts/lib/Either'
+import * as t from 'io-ts'
+import { Logging } from 'zio/logging'
 
-export type Query =
-  | Query.Select
-  | Query.From
-  | Query.Where
+export type Query = Query.Select | Query.From | Query.Where
 
 export interface QueryTask {
-  group: 'Query',
+  group: 'Query'
   payload: QueryTask.Payload
 }
 export namespace QueryTask {
-  export type Payload =
-    | Execute
-    | Explain
-    | AddChangeListener
+  export type Payload = Execute | Explain | AddChangeListener | RemoveChangeListener
 
   export function init(payload: Payload): QueryTask {
     return {
@@ -54,44 +51,54 @@ export namespace QueryTask {
   export interface AddChangeListener {
     tag: 'AddChangeListener'
     query: Query
-    queryId: string
+    listenerId: string
   }
-  export function addChangeListener(query: Query, queryId: string): QueryTask {
+  export function addChangeListener(query: Query, listenerId: string): QueryTask {
     return init({
       tag: 'AddChangeListener',
       query,
-      queryId
+      listenerId
     })
   }
 
-  const queryIds = new Map<Query, string>()
-
-  export function nextQueryId(query: Query) {
-    return pipe(
-      CouchbaseLite.nextId,
-      ZIO.tap(id => ZIO.effectTotal(() => {
-        queryIds.set(query, id)
-      }))
-    )
+  export interface RemoveChangeListener {
+    tag: 'RemoveChangeListener'
+    listenerId: string
   }
-
-  export function getQueryId(query: Query): UIO<Option<string>> {
-    return pipe(
-      queryIds.get(query),
-      O.fromNullable,
-      ZIO.succeed
-    )
+  export function removeChangeListener(listenerId: string): QueryTask {
+    return init({
+      tag: 'RemoveChangeListener',
+      listenerId
+    })
   }
 }
 
+export function QueryResult<C extends t.Mixed>(codec: C) {
+  return t.type({
+    result: t.array(codec)
+  })
+}
+export interface QueryResult<A> {
+  result: Array<A>
+}
+
 export namespace Query {
-  export function execute(query: Query): ZIO<CouchbaseLite, Throwable, Any> {
-    return pipe(
-      query,
-      QueryTask.execute,
-      CouchbaseLite.run
-    )
+  export function execute<C extends t.Mixed>(
+    codec: C
+  ): (query: Query) => ZIO<CouchbaseLite, Throwable, Array<t.TypeOf<C>>> {
+    return query =>
+      pipe(
+        query,
+        QueryTask.execute,
+        CouchbaseLite.run,
+        ZIO.flatMap(result => pipe(
+          result,
+          ZIO.decode(QueryResult(codec)),
+          ZIO.bimap(error => Throwable(`query result decode error: ${error.paths} ${JSON.stringify(error.input)}`), _ => _.result)
+        )),
+      )
   }
+
   export function explain(query: Query): ZIO<CouchbaseLite, Throwable, Any> {
     return pipe(
       query,
@@ -99,18 +106,69 @@ export namespace Query {
       CouchbaseLite.run
     )
   }
-  export function addChangeListener(query: Query) {
-    return pipe(
-      query,
-      QueryTask.getQueryId,
-      ZIO.flatMap(O.fold(
-        () => QueryTask.nextQueryId(query),
-        ZIO.succeed
-      )),
-      ZIO.flatMap(queryId => pipe(
-        QueryTask.addChangeListener(query, queryId),
-        CouchbaseLite.run
-      ))
+
+  export function executeLive<C extends t.Mixed>(
+    codec: C
+  ): (query: Query) => ZStream<CouchbaseLite & Logging, Throwable, Array<t.TypeOf<C>>> {
+    return query => pipe(
+      ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
+      ZStream.fromEffect,
+      ZStream.flatMap(([eventEmitter, listenerId]) =>
+        pipe(
+          new Observable<E.Either<Throwable, QueryResult<t.TypeOf<C>>>>(observer => {
+            const subscription = eventEmitter.addListener('Query.Change', event =>
+              pipe(
+                event,
+                decode(t.type({ listenerId: t.string })),
+                E.fold(
+                  error => {
+                    observer.next(
+                      E.left(Throwable(`query change listenerId decode error: ${error.paths} ${JSON.stringify(error.input)}`))
+                    )
+                  },
+                  success => {
+                    if (success.listenerId === listenerId) {
+                      pipe(
+                        event,
+                        decode(QueryResult(codec)),
+                        E.fold(
+                          error => {
+                            observer.next(
+                              E.left(Throwable(`query change decode error: ${error.paths} ${JSON.stringify(error.input)}`))
+                            )
+                          },
+                          success => {
+                            observer.next(E.right(success))
+                          }
+                        )
+                      )
+                    }
+                  }
+                )
+              )
+            )
+
+            pipe(
+              QueryTask.addChangeListener(query, listenerId),
+              CouchbaseLite.run,
+              ZIO.provideM(CouchbaseLite.live),
+              ZIO.run({})
+            )
+
+            return () => {
+              pipe(
+                QueryTask.removeChangeListener(listenerId),
+                CouchbaseLite.run,
+                ZIO.flatMap(_ => ZIO.effect(() => subscription.remove())),
+                ZIO.provideM(CouchbaseLite.live),
+                ZIO.run({})
+              )
+            }
+          }),
+          ZStream.fromObservableEither,
+          ZStream.map(_ => _.result)
+        )
+      )
     )
   }
 

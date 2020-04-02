@@ -1,10 +1,8 @@
 package com.couchbase.lite
 
-import arrow.core.Either
+import arrow.core.*
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.list.traverse.sequence
-import arrow.core.fix
-import arrow.core.flatMap
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
@@ -20,6 +18,7 @@ import org.json.JSONObject
 
 object RNQuery {
   private val listenerTokens: HashMap<String, ListenerToken> = hashMapOf()
+  private val listenedQueries: HashMap<String, Query> = hashMapOf()
 
   fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = RNTag.get(obj)
     .flatMap { tag -> when (tag) {
@@ -39,15 +38,33 @@ object RNQuery {
 
       "AddChangeListener" -> Either.applicative<String>().tupled(
         obj.getMap("query").flatMap { RNQuery.decode(it) },
-        obj.getString("queryId")
+        obj.getString("listenerId")
       ).fix().map { tuple ->
         val query = tuple.a
-        val queryId = tuple.b
-        listenerTokens[queryId] = query.addChangeListener { change ->
-          eventEmitter.sendEvent("Query.Change", writeResultSet(change.results))
+        val listenerId = tuple.b
+        listenedQueries[listenerId] = query
+        listenerTokens[listenerId] = query.addChangeListener { change ->
+          val result = writeResultSet(change.results)
+          result.putString("listenerId", listenerId)
+          eventEmitter.sendEvent("Query.Change", result)
         }
+        query.execute()
         Arguments.createMap()
       }
+
+      "RemoveChangeListener" -> obj.getString("listenerId")
+        .flatMap { listenerId ->
+          Either.applicative<String>().tupled(
+            listenedQueries[listenerId].rightIfNotNull { "query not found with listenerId $listenerId" },
+            listenerTokens[listenerId].rightIfNotNull { "listener token not found with listenerId $listenerId" }
+          ).fix()
+        }.map { tuple ->
+          val query = tuple.a
+          val token = tuple.b
+          query.removeChangeListener(token)
+
+          Arguments.createMap()
+        }
 
       else -> Either.left("$tag is not RNQuery task")
     } }

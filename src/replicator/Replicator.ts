@@ -7,9 +7,10 @@ import { ActivityLevel } from './ActivityLevel'
 import { enumC } from '../enumC'
 import { ZStream } from 'zio/stream'
 import { decode, Throwable, ZIO } from 'zio'
-import { Subject } from 'rxjs'
+import { Observable } from 'rxjs'
 import * as E from 'fp-ts/lib/Either'
-import { Logging, logEffect, log } from 'zio/logging'
+import { Logging } from 'zio/logging'
+import { Either } from 'fp-ts/lib/Either'
 
 export interface Replicator {
   config: ReplicatorConfiguration
@@ -70,56 +71,50 @@ export namespace Replicator {
     )
   }
   export function onChange(database: string): ZStream<CouchbaseLite & Logging, Throwable, ReplicatorStatus> {
-    return ZStream.bracket(
-      pipe(
-        ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
-        ZIO.flatMap(([eventEmitter, eventId]) => pipe(
-          ZIO.effect(() => {
-            const subject = new Subject<E.Either<Throwable, ReplicatorStatusEvent>>()
+    return pipe(
+      ZIO.zip(CouchbaseLite.eventEmitter, CouchbaseLite.nextId),
+      ZStream.fromEffect,
+      ZStream.flatMap(([eventEmitter, eventId]) =>
+        pipe(
+          new Observable<Either<Throwable, ReplicatorStatusEvent>>(observer => {
             const subscription = eventEmitter.addListener(ReplicatorStatusEventName, event =>
               pipe(
                 event,
                 decode(ReplicatorStatusEvent),
                 E.fold(
                   error => {
-                    subject.next(
+                    observer.next(
                       E.left(Throwable(`replicator status decode error: ${error.paths} ${JSON.stringify(error.input)}`))
                     )
                   },
                   success => {
-                    subject.next(E.right(success))
+                    observer.next(E.right(success))
                   }
                 )
               )
             )
-            return [subject.asObservable(), eventId, subscription] as const
-          }),
-          ZIO.tap(() =>
+
             pipe(
               ReplicatorTask.AddChangeListener(database, eventId),
-              CouchbaseLite.run
+              CouchbaseLite.run,
+              ZIO.provideM(CouchbaseLite.live),
+              ZIO.run({})
             )
-          ),
-        )),
-        logEffect("onChange.acquire")
-      ),
-      ([source, eventId]) =>
-        pipe(
-          source,
+            return () => {
+              pipe(
+                ReplicatorTask.RemoveChangeListener(database, eventId),
+                CouchbaseLite.run,
+                ZIO.flatMap(_ => ZIO.effect(() => subscription.remove())),
+                ZIO.provideM(CouchbaseLite.live),
+                ZIO.run({})
+              )
+            }
+          }),
           ZStream.fromObservableEither,
-          ZStream.tapBoth(log, log),
           ZStream.filter(_ => _.id === eventId),
           ZStream.map(_ => _.status)
-        ),
-      ([_, eventId, subscription]) =>
-        pipe(
-          ReplicatorTask.RemoveChangeListener(database, eventId),
-          CouchbaseLite.run,
-          ZIO.flatMap(_ =>
-            ZIO.effect(() => subscription.remove())
-          ),
-          logEffect('onChange.release')
         )
+      )
     )
   }
 }
