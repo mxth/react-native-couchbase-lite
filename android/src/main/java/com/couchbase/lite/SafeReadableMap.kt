@@ -7,9 +7,13 @@ import arrow.core.rightIfNotNull
 import com.facebook.react.bridge.NoSuchKeyException
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
+import com.reactnativecouchbaselite.RNDataSource
+import com.reactnativecouchbaselite.RNExpression
 import java.lang.Exception
 
-class SafeReadableMap(private val map: ReadableMap) {
+class SafeReadableMap(val map: ReadableMap) {
+  val tag = getString("tag")
+
   fun getString(name: String): Either<String, String> =
     try {
       map.getString(name).rightIfNotNull { "$name is null" }
@@ -46,4 +50,9 @@ class SafeReadableMap(private val map: ReadableMap) {
   fun getListString(name: String) = getArray(name).flatMap { it.toListString() }
 
   fun getListMap(name: String) = getArray(name).flatMap { it.toListMap() }
+
+
+  fun getDataSource(name: String) = getMap(name).flatMap { RNDataSource.decode(it) }
+
+  fun getExpression(name: String) = getMap(name).flatMap { RNExpression.decode(it) }
 }

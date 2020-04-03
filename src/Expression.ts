@@ -1,10 +1,14 @@
+import { MetaExpression } from './Meta'
+import { pipe } from 'fp-ts/lib/pipeable'
+
 export type Expression =
+  | MetaExpression
   | PropertyExpression
   | Expression.DateE
   | Expression.Not
   | Expression.Number
   | Expression.String
-  | Expression.PropertyFrom
+  | Expression.From
   | Expression.Add
   | Expression.And
   | Expression.EqualTo
@@ -53,14 +57,15 @@ export namespace Expression {
     return { tag: 'Property', property }
   }
 
-  export interface PropertyFrom {
-    tag: 'PropertyFrom'
+  export type FromRouter =  PropertyExpression | MetaExpression
+  export interface From {
+    tag: 'From'
     alias: string
-    expression: PropertyExpression
+    expression: FromRouter
   }
-  export function from(alias: string): (expression: PropertyExpression) => PropertyFrom {
+  export function from(alias: string): (expression: FromRouter) => From {
     return expression => ({
-      tag: 'PropertyFrom',
+      tag: 'From',
       alias,
       expression
     })
@@ -100,16 +105,34 @@ export namespace Expression {
     a: Expression
     b: Expression
   }
-  export function equalTo(b: string | number | Date): (a: Expression) => EqualTo {
-    function mapExpr() {
-      if (typeof b === 'string') {
-        return Expression.string(b)
-      }
-      if (typeof b === 'number') {
-        return Expression.number(b)
-      }
-      return Expression.date(b)
+  export function equalTo(b: Expression): (a: Expression) => EqualTo {
+    return a => ({ tag: 'EqualTo', a, b })
+  }
+
+  export function propertyEqual(property: string, value: DecodeValue): EqualTo {
+    return pipe(
+      Expression.property(property),
+      Expression.equalTo(decode(value))
+    )
+  }
+
+  export function propertyFromEqual([property, from]: [string, string], value: DecodeValue): EqualTo {
+    return pipe(
+      Expression.property(property),
+      Expression.from(from),
+      Expression.equalTo(decode(value))
+    )
+  }
+
+  type DecodeValue = string | number | Date
+
+  export function decode(value: string | number | Date) {
+    if (typeof value === 'string') {
+      return Expression.string(value)
     }
-    return a => ({ tag: 'EqualTo', a, b: mapExpr() })
+    if (typeof value === 'number') {
+      return Expression.number(value)
+    }
+    return Expression.date(value)
   }
 }

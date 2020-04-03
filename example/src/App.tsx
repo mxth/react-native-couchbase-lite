@@ -6,7 +6,7 @@ import {
   ReplicatorConfiguration,
   ReplicatorType,
   ReplicatorStatus,
-  SelectResult, DataSource, Expression, Database
+  SelectResult, DataSource, Expression, Query, Meta, Join
 } from 'react-native-couchbase-lite'
 import { Input, Button, CheckBox } from 'react-native-elements'
 import { pipe } from 'fp-ts/lib/pipeable'
@@ -17,7 +17,6 @@ import { take } from 'rxjs/operators'
 import { locallyAnnotateName, log, logEffect } from 'zio/logging'
 import { flow } from 'fp-ts/lib/function'
 import * as t from 'io-ts'
-import { Query } from '../../src/Query'
 import { ZIO } from 'zio'
 
 function logEffectReplicator(task: string) {
@@ -70,20 +69,17 @@ export default function App() {
     Query.select(
       SelectResult.all()
     ),
-    Query.from(pipe(
-      Database.init(config.database),
-      DataSource.database
-    )),
-    Query.where(pipe(
-      Expression.property('typekey'),
-      Expression.equalTo('Redemption')
-    )),
+    Query.from(DataSource.database(config.database)),
+    Query.where(
+      Expression.propertyEqual('typekey', 'Redemption'),
+    ),
   )
   const simpleQuery = () => pipe(
     query,
     Query.execute(t.unknown),
     ExampleApp.run
   )
+
   const explainQuery = () => pipe(
     query,
     Query.explain,
@@ -97,8 +93,51 @@ export default function App() {
     ExampleApp.run
   )
 
+
   const stopQuery = () => pipe(
     interruptLiveQuery.next()
+  )
+
+  const complexQuery = () => pipe(
+    Query.select(
+      SelectResult.expression(pipe(
+        Expression.property('agentData'),
+        Expression.from('redemption')
+      )),
+      SelectResult.expression(pipe(
+        Expression.property('createdDate'),
+        Expression.from('point')
+      )),
+    ),
+    Query.from(pipe(
+      DataSource.database(config.database),
+      DataSource.as('redemption')
+    )),
+    Query.join(pipe(
+      Join.join(pipe(
+        DataSource.database(config.database),
+        DataSource.as('point')
+      )),
+      Join.on(pipe(
+        Meta.id,
+        Expression.from("redemption"),
+        Expression.equalTo(
+          pipe(
+            Expression.property('rewardId'),
+            Expression.from("point")
+          )
+        )
+      ))
+    )),
+    Query.where(pipe(
+      Expression.propertyFromEqual(['typekey', 'redemption'], 'Redemption'),
+      Expression.and(
+        Expression.propertyFromEqual(['idPrefix', 'point'], 'EarnPointHistory'),
+      )
+    )),
+    Query.limitWithOffset(1, 0),
+    Query.execute(t.unknown),
+    ExampleApp.run
   )
 
   return (
@@ -136,6 +175,7 @@ export default function App() {
           <Button title="LIVE QUERY" onPress={liveQuery} />
           <Button title="STOP QUERY" onPress={stopQuery} />
           <Button title="EXPLAIN" onPress={explainQuery} />
+          <Button title="COMPLEX" onPress={complexQuery} />
         </View>
       </View>
 

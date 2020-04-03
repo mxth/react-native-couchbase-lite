@@ -32,7 +32,7 @@ export namespace CouchbaseLite {
     })
   )
 
-  export function run<T extends RNTask>(task: T) {
+  export function apply<T extends RNTask>(task: T) {
     return ZIO.accessM((_: CouchbaseLite) => ZIO.fromPromise(() => _.couchbase.nativeModule.run(task)))
   }
 

@@ -4,11 +4,10 @@ import arrow.core.Either
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.fix
 import arrow.core.flatMap
-import com.facebook.react.bridge.ReadableMap
 
 object RNAuthenticator {
   fun decode(obj: SafeReadableMap): Either<String, Authenticator> =
-    RNTag.get(obj)
+    obj.tag
       .flatMap { tag -> when (tag) {
         "BasicAuthenticator" -> Either.applicative<String>().tupled(
           obj.getString("username"),

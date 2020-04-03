@@ -9,8 +9,18 @@ import { Observable } from 'rxjs'
 import * as E from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import { Logging } from 'zio/logging'
+import { Join } from './Join'
+import { Ordering } from './Ordering'
 
-export type Query = Query.Select | Query.From | Query.Where
+export type Query =
+  | Query.Select
+  | Query.From
+  | Query.Joins
+  | Query.Where
+  | Query.GroupBy
+  | Query.Having
+  | Query.OrderBy
+  | Query.Limit
 
 export interface QueryTask {
   group: 'Query'
@@ -90,7 +100,7 @@ export namespace Query {
       pipe(
         query,
         QueryTask.execute,
-        CouchbaseLite.run,
+        CouchbaseLite.apply,
         ZIO.flatMap(result => pipe(
           result,
           ZIO.decode(QueryResult(codec)),
@@ -103,7 +113,7 @@ export namespace Query {
     return pipe(
       query,
       QueryTask.explain,
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
 
@@ -150,7 +160,7 @@ export namespace Query {
 
             pipe(
               QueryTask.addChangeListener(query, listenerId),
-              CouchbaseLite.run,
+              CouchbaseLite.apply,
               ZIO.provideM(CouchbaseLite.live),
               ZIO.run({})
             )
@@ -158,7 +168,7 @@ export namespace Query {
             return () => {
               pipe(
                 QueryTask.removeChangeListener(listenerId),
-                CouchbaseLite.run,
+                CouchbaseLite.apply,
                 ZIO.flatMap(_ => ZIO.effect(() => subscription.remove())),
                 ZIO.provideM(CouchbaseLite.live),
                 ZIO.run({})
@@ -182,19 +192,95 @@ export namespace Query {
 
   export interface From {
     tag: 'From'
-    dataSource: DataSource
     query: Select
+    dataSource: DataSource
   }
   export function from(dataSource: DataSource): (query: Select) => From {
-    return query => ({ tag: 'From', dataSource, query })
+    return query => ({ tag: 'From', query, dataSource })
   }
 
+  export type JoinRouter = From
+  export interface Joins {
+    tag: 'Joins'
+    query: JoinRouter
+    joins: Join[]
+  }
+  export function join(...joins: Join[]): (query: JoinRouter) => Joins {
+    return query => ({ tag: 'Joins', query, joins })
+  }
+
+  export type WhereRouter = From | Joins
   export interface Where {
     tag: 'Where'
+    query: WhereRouter
     expression: Expression
-    query: From
   }
-  export function where(expression: Expression): (query: From) => Where {
-    return query => ({ tag: 'Where', expression, query })
+  export function where(expression: Expression): (query: WhereRouter) => Where {
+    return query => ({ tag: 'Where', query, expression })
+  }
+
+  export type GroupByRouter = From | Where
+  export interface GroupBy {
+    tag: 'GroupBy'
+    query: GroupByRouter
+    expressions: Expression[]
+  }
+  export function groupBy(...expressions: Expression[]): (query: GroupByRouter) => GroupBy {
+    return query => ({ tag: 'GroupBy', query, expressions })
+  }
+
+  export type OrderByRouter = From | Joins | Where | GroupBy | Having
+  export interface OrderBy {
+    tag: 'OrderBy'
+    query: OrderByRouter
+    orderings: Ordering[]
+  }
+  export function orderBy(...orderings: Ordering[]): (query: OrderByRouter) => OrderBy {
+    return query => ({ tag: 'OrderBy', query, orderings })
+  }
+
+  export type CanLimit = From | Joins | Where | GroupBy | Having | OrderBy
+  export type Limit = Limit.Limit | Limit.LimitWithOffset
+  export namespace Limit {
+    export interface Limit {
+      tag: 'Limit'
+      query: CanLimit
+      expression: Expression
+    }
+    export interface LimitWithOffset {
+      tag: 'LimitWithOffset'
+      query: CanLimit
+      expression: Expression
+      offset: Expression
+    }
+  }
+  export function limit(value: number): (query: CanLimit) => Limit.Limit {
+    return query => ({
+      tag: 'Limit',
+      query,
+      expression: Expression.number(value)
+    })
+  }
+  export function limitWithOffset(value: number, offset: number): (query: CanLimit) => Limit.LimitWithOffset {
+    return query => ({
+      tag: 'LimitWithOffset',
+      query,
+      expression: Expression.number(value),
+      offset: Expression.number(offset),
+    })
+  }
+
+  export type HavingRouter = GroupBy
+  export interface Having {
+    tag: 'Having'
+    query: HavingRouter
+    expression: Expression
+  }
+  export function having(expression: Expression): (query: HavingRouter) => Having {
+    return query => ({
+      tag: 'Having',
+      query,
+      expression
+    })
   }
 }

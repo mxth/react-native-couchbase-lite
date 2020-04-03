@@ -2,7 +2,6 @@ package com.couchbase.lite
 
 import arrow.core.*
 import arrow.core.extensions.either.applicative.applicative
-import arrow.core.extensions.list.traverse.sequence
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
@@ -10,9 +9,6 @@ import com.facebook.react.bridge.WritableNativeArray
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.reactnativecouchbaselite.EventEmitter
-import com.reactnativecouchbaselite.RNDataSource
-import com.reactnativecouchbaselite.RNExpression
-import com.reactnativecouchbaselite.RNSelectResult
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -20,8 +16,8 @@ object RNQuery {
   private val listenerTokens: HashMap<String, ListenerToken> = hashMapOf()
   private val listenedQueries: HashMap<String, Query> = hashMapOf()
 
-  fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = RNTag.get(obj)
-    .flatMap { tag -> when (tag) {
+  fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> =
+    obj.tag.flatMap { tag -> when (tag) {
       "Execute" -> obj.getMap("query")
         .flatMap { RNQuery.decode(it) }
         .map {
@@ -69,41 +65,17 @@ object RNQuery {
       else -> Either.left("$tag is not RNQuery task")
     } }
 
-  private fun decode(obj: SafeReadableMap): Either<String, Query> = RNTag.get(obj)
-    .flatMap { tag -> when (tag) {
-      "Select" -> select(obj)
-
-      "From" -> from(obj)
-
-      "Where" -> where(obj)
-
-      else -> Either.left("$tag is not RNQuery")
-    } }
-
-  private fun select(obj: SafeReadableMap): Either<String, Select> =
-    obj.getListMap("results")
-      .flatMap { it
-        .map { RNSelectResult.decode(it) }
-        .sequence(Either.applicative())
-        .fix()
-        .map { results ->
-          QueryBuilder.select(*results.fix().toTypedArray())
-        }
-      }
-
-  private fun from(obj: SafeReadableMap): Either<String, From> =
-    Either.applicative<String>().tupled(
-      obj.getMap("query").flatMap { select(it) },
-      obj.getMap("dataSource").flatMap { RNDataSource.decode(it) }
-    ).fix()
-      .map { it.a.from(it.b) }
-
-  private fun where(obj: SafeReadableMap): Either<String, Where> =
-    Either.applicative<String>().tupled(
-      obj.getMap("query").flatMap { from(it) },
-      obj.getMap("expression").flatMap { RNExpression.decode(it) }
-    ).fix()
-      .map { it.a.where(it.b) }
+  private fun decode(obj: SafeReadableMap): Either<String, Query> =
+    RNSelect.decode(obj)
+      .handleErrorWith { RNFrom.decode(obj) }
+      .handleErrorWith { RNJoins.decode(obj) }
+      .handleErrorWith { RNWhere.decode(obj) }
+      .handleErrorWith { RNGroupBy.decode(obj) }
+      .handleErrorWith { RNHaving.decode(obj) }
+      .handleErrorWith { RNOrderBy.decode(obj) }
+      .handleErrorWith { RNLimit.decode(obj) }
+      .handleErrorWith { RNLimit.decodeOffset(obj) }
+      .mapLeft { "invalid Query $it ${obj.map}" }
 
   private fun writeResultSet(a: ResultSet): WritableMap {
     val builder = GsonBuilder()

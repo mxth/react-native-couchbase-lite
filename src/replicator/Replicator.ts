@@ -43,31 +43,31 @@ export namespace Replicator {
   export function debug() {
     return pipe(
       ReplicatorTask.Debug(),
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
   export function init(config: ReplicatorConfiguration) {
     return pipe(
       ReplicatorTask.Init(config),
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
   export function start(database: string) {
     return pipe(
       ReplicatorTask.Start(database),
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
   export function stop(database: string) {
     return pipe(
       ReplicatorTask.Stop(database),
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
   export function status(database: string) {
     return pipe(
       ReplicatorTask.Status(database),
-      CouchbaseLite.run
+      CouchbaseLite.apply
     )
   }
   export function onChange(database: string): ZStream<CouchbaseLite & Logging, Throwable, ReplicatorStatus> {
@@ -96,14 +96,14 @@ export namespace Replicator {
 
             pipe(
               ReplicatorTask.AddChangeListener(database, eventId),
-              CouchbaseLite.run,
+              CouchbaseLite.apply,
               ZIO.provideM(CouchbaseLite.live),
               ZIO.run({})
             )
             return () => {
               pipe(
                 ReplicatorTask.RemoveChangeListener(database, eventId),
-                CouchbaseLite.run,
+                CouchbaseLite.apply,
                 ZIO.flatMap(_ => ZIO.effect(() => subscription.remove())),
                 ZIO.provideM(CouchbaseLite.live),
                 ZIO.run({})

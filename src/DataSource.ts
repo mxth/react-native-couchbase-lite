@@ -7,10 +7,10 @@ export namespace DataSource {
     tag: 'Init'
     database: Database
   }
-  export function database(database: Database): Init {
+  export function database(name: string): Init {
     return {
       tag: 'Init',
-      database
+      database: Database.init(name)
     }
   }
 

@@ -2,13 +2,12 @@ package com.reactnativecouchbaselite
 
 import arrow.core.Either
 import arrow.core.flatMap
-import com.couchbase.lite.RNTag
 import com.couchbase.lite.SafeReadableMap
 import com.couchbase.lite.SelectResult
 
 object RNSelectResult {
-  fun decode(obj: SafeReadableMap): Either<String, SelectResult> = RNTag.get(obj)
-    .flatMap { tag -> when (tag) {
+  fun decode(obj: SafeReadableMap): Either<String, SelectResult> =
+    obj.tag.flatMap { tag -> when (tag) {
       "All" -> Either.right(SelectResult.all())
 
       "Expression" -> obj.getMap("expression")

@@ -6,7 +6,6 @@ import arrow.core.fix
 import arrow.core.flatMap
 import com.couchbase.lite.DataSource
 import com.couchbase.lite.Database
-import com.couchbase.lite.RNTag
 import com.couchbase.lite.SafeReadableMap
 
 object RNDataSource {
@@ -19,8 +18,8 @@ object RNDataSource {
       db
     })
 
-  fun decode(obj: SafeReadableMap) = RNTag.get(obj)
-    .flatMap { tag -> when (tag) {
+  fun decode(obj: SafeReadableMap) =
+    obj.tag.flatMap { tag -> when (tag) {
       "Init" -> init(obj)
 
       "As" -> Either.applicative<String>().tupled(

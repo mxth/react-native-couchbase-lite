@@ -38,8 +38,8 @@ object RNReplicator {
     return result
   }
 
-  fun run(payload: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> = RNTag.get(payload)
-    .flatMap { tag ->
+  fun run(payload: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> =
+    payload.tag.flatMap { tag ->
       fun getReplicator() = payload.getString("database")
         .flatMap { getOne(it) }
       when (tag) {

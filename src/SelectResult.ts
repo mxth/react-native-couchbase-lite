@@ -47,7 +47,7 @@ export namespace SelectResult {
     alias: string
     selectResult: SelectResultExpression | Property
   }
-  export function as(alias: string): (selectResult: Expression | Property) => As {
+  export function as(alias: string): (selectResult: SelectResultExpression | Property) => As {
     return selectResult => ({
       tag: 'As',
       alias,
