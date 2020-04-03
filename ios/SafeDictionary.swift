@@ -1,4 +1,5 @@
 import Bow
+import CouchbaseLiteSwift
 
 class SafeDictionary {
   static func empty() -> [AnyHashable: Any] {
@@ -10,6 +11,9 @@ class SafeDictionary {
   init(dict: [AnyHashable: Any]) {
     self.dict = dict
   }
+
+  lazy var tag: Either<String, String> = getString("tag")
+
   func getString(_ name: String) -> Either<String, String> {
     return RCTConvert.nsString(dict[name])
       .rightIfNotNull("\(name) is null")
@@ -39,4 +43,7 @@ class SafeDictionary {
       .rightIfNotNull("\(name) is null")
   }
 
+  func getQuery(_ name: String) -> Either<String, Query> {
+    return getDict(name).flatMap(RNQuery.decode)^
+  }
 }

@@ -10,6 +10,20 @@
 		15081D52242D18F800B16AD4 /* CouchbaseLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15081D51242D18F800B16AD4 /* CouchbaseLite.swift */; };
 		15701F4D242DD2AB00EE2B36 /* RNTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15701F4C242DD2AB00EE2B36 /* RNTask.swift */; };
 		15701F4F242DD3B600EE2B36 /* SafeDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15701F4E242DD3B600EE2B36 /* SafeDictionary.swift */; };
+		15A0E5A124379A350043DF89 /* RNQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5A024379A350043DF89 /* RNQuery.swift */; };
+		15A0E5A324379CE30043DF89 /* RNSelect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5A224379CE30043DF89 /* RNSelect.swift */; };
+		15A0E5A524379D090043DF89 /* RNSelectResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5A424379D090043DF89 /* RNSelectResult.swift */; };
+		15A0E5A724379D3A0043DF89 /* RNExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5A624379D3A0043DF89 /* RNExpression.swift */; };
+		15A0E5A924379D5C0043DF89 /* RNFrom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5A824379D5C0043DF89 /* RNFrom.swift */; };
+		15A0E5AB24379D720043DF89 /* RNDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5AA24379D720043DF89 /* RNDataSource.swift */; };
+		15A0E5AD24379D8D0043DF89 /* RNJoins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5AC24379D8D0043DF89 /* RNJoins.swift */; };
+		15A0E5AF24379DA70043DF89 /* RNJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5AE24379DA70043DF89 /* RNJoin.swift */; };
+		15A0E5B124379DBF0043DF89 /* RNWhere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5B024379DBF0043DF89 /* RNWhere.swift */; };
+		15A0E5B324379DD50043DF89 /* RNGroupBy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5B224379DD50043DF89 /* RNGroupBy.swift */; };
+		15A0E5B524379DEF0043DF89 /* RNHaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5B424379DEF0043DF89 /* RNHaving.swift */; };
+		15A0E5B724379E0B0043DF89 /* RNOrderBy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5B624379E0B0043DF89 /* RNOrderBy.swift */; };
+		15A0E5B924379E1E0043DF89 /* RNOrdering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5B824379E1E0043DF89 /* RNOrdering.swift */; };
+		15A0E5BB24379E2F0043DF89 /* RNLimit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0E5BA24379E2F0043DF89 /* RNLimit.swift */; };
 		15C70842242E53BE005F5A1C /* RNReplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C70841242E53BE005F5A1C /* RNReplicator.swift */; };
 		15C70844242E5A8D005F5A1C /* RNReplicatorConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C70843242E5A8D005F5A1C /* RNReplicatorConfiguration.swift */; };
 		15C70846242E5FD6005F5A1C /* RNReplicatorType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C70845242E5FD6005F5A1C /* RNReplicatorType.swift */; };
@@ -36,6 +50,20 @@
 		15081D51242D18F800B16AD4 /* CouchbaseLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouchbaseLite.swift; sourceTree = "<group>"; };
 		15701F4C242DD2AB00EE2B36 /* RNTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNTask.swift; sourceTree = "<group>"; };
 		15701F4E242DD3B600EE2B36 /* SafeDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeDictionary.swift; sourceTree = "<group>"; };
+		15A0E5A024379A350043DF89 /* RNQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNQuery.swift; sourceTree = "<group>"; };
+		15A0E5A224379CE30043DF89 /* RNSelect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNSelect.swift; sourceTree = "<group>"; };
+		15A0E5A424379D090043DF89 /* RNSelectResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNSelectResult.swift; sourceTree = "<group>"; };
+		15A0E5A624379D3A0043DF89 /* RNExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNExpression.swift; sourceTree = "<group>"; };
+		15A0E5A824379D5C0043DF89 /* RNFrom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNFrom.swift; sourceTree = "<group>"; };
+		15A0E5AA24379D720043DF89 /* RNDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNDataSource.swift; sourceTree = "<group>"; };
+		15A0E5AC24379D8D0043DF89 /* RNJoins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNJoins.swift; sourceTree = "<group>"; };
+		15A0E5AE24379DA70043DF89 /* RNJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNJoin.swift; sourceTree = "<group>"; };
+		15A0E5B024379DBF0043DF89 /* RNWhere.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNWhere.swift; sourceTree = "<group>"; };
+		15A0E5B224379DD50043DF89 /* RNGroupBy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNGroupBy.swift; sourceTree = "<group>"; };
+		15A0E5B424379DEF0043DF89 /* RNHaving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHaving.swift; sourceTree = "<group>"; };
+		15A0E5B624379E0B0043DF89 /* RNOrderBy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNOrderBy.swift; sourceTree = "<group>"; };
+		15A0E5B824379E1E0043DF89 /* RNOrdering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNOrdering.swift; sourceTree = "<group>"; };
+		15A0E5BA24379E2F0043DF89 /* RNLimit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNLimit.swift; sourceTree = "<group>"; };
 		15C70841242E53BE005F5A1C /* RNReplicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNReplicator.swift; sourceTree = "<group>"; };
 		15C70843242E5A8D005F5A1C /* RNReplicatorConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNReplicatorConfiguration.swift; sourceTree = "<group>"; };
 		15C70845242E5FD6005F5A1C /* RNReplicatorType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNReplicatorType.swift; sourceTree = "<group>"; };
@@ -66,6 +94,20 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				15A0E5BA24379E2F0043DF89 /* RNLimit.swift */,
+				15A0E5B824379E1E0043DF89 /* RNOrdering.swift */,
+				15A0E5B624379E0B0043DF89 /* RNOrderBy.swift */,
+				15A0E5B424379DEF0043DF89 /* RNHaving.swift */,
+				15A0E5B224379DD50043DF89 /* RNGroupBy.swift */,
+				15A0E5B024379DBF0043DF89 /* RNWhere.swift */,
+				15A0E5AE24379DA70043DF89 /* RNJoin.swift */,
+				15A0E5AC24379D8D0043DF89 /* RNJoins.swift */,
+				15A0E5AA24379D720043DF89 /* RNDataSource.swift */,
+				15A0E5A824379D5C0043DF89 /* RNFrom.swift */,
+				15A0E5A624379D3A0043DF89 /* RNExpression.swift */,
+				15A0E5A424379D090043DF89 /* RNSelectResult.swift */,
+				15A0E5A224379CE30043DF89 /* RNSelect.swift */,
+				15A0E5A024379A350043DF89 /* RNQuery.swift */,
 				15C70849242E6898005F5A1C /* RNDatabase.swift */,
 				15C70847242E6219005F5A1C /* RNAuthenticator.swift */,
 				15C70845242E5FD6005F5A1C /* RNReplicatorType.swift */,
@@ -138,14 +180,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				15A0E5AF24379DA70043DF89 /* RNJoin.swift in Sources */,
 				15C70846242E5FD6005F5A1C /* RNReplicatorType.swift in Sources */,
 				15701F4F242DD3B600EE2B36 /* SafeDictionary.swift in Sources */,
+				15A0E5A724379D3A0043DF89 /* RNExpression.swift in Sources */,
+				15A0E5AB24379D720043DF89 /* RNDataSource.swift in Sources */,
+				15A0E5A924379D5C0043DF89 /* RNFrom.swift in Sources */,
+				15A0E5A524379D090043DF89 /* RNSelectResult.swift in Sources */,
+				15A0E5B124379DBF0043DF89 /* RNWhere.swift in Sources */,
+				15A0E5B324379DD50043DF89 /* RNGroupBy.swift in Sources */,
 				15C70844242E5A8D005F5A1C /* RNReplicatorConfiguration.swift in Sources */,
 				15C70848242E6219005F5A1C /* RNAuthenticator.swift in Sources */,
+				15A0E5B924379E1E0043DF89 /* RNOrdering.swift in Sources */,
 				15C70842242E53BE005F5A1C /* RNReplicator.swift in Sources */,
 				15C7084A242E6898005F5A1C /* RNDatabase.swift in Sources */,
+				15A0E5A124379A350043DF89 /* RNQuery.swift in Sources */,
+				15A0E5B524379DEF0043DF89 /* RNHaving.swift in Sources */,
+				15A0E5AD24379D8D0043DF89 /* RNJoins.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* CouchbaseLite.m in Sources */,
 				15081D52242D18F800B16AD4 /* CouchbaseLite.swift in Sources */,
+				15A0E5B724379E0B0043DF89 /* RNOrderBy.swift in Sources */,
+				15A0E5A324379CE30043DF89 /* RNSelect.swift in Sources */,
+				15A0E5BB24379E2F0043DF89 /* RNLimit.swift in Sources */,
 				15701F4D242DD2AB00EE2B36 /* RNTask.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

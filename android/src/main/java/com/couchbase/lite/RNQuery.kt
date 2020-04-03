@@ -18,14 +18,12 @@ object RNQuery {
 
   fun run(obj: SafeReadableMap, eventEmitter: EventEmitter): Either<String, WritableMap> =
     obj.tag.flatMap { tag -> when (tag) {
-      "Execute" -> obj.getMap("query")
-        .flatMap { RNQuery.decode(it) }
+      "Execute" -> obj.getQuery("query")
         .map {
           writeResultSet(it.execute())
         }
 
-      "Explain" -> obj.getMap("query")
-        .flatMap { RNQuery.decode(it) }
+      "Explain" -> obj.getQuery("query")
         .map { query ->
           val data = Arguments.createMap()
           data.putString("explain", query.explain())
@@ -33,7 +31,7 @@ object RNQuery {
         }
 
       "AddChangeListener" -> Either.applicative<String>().tupled(
-        obj.getMap("query").flatMap { RNQuery.decode(it) },
+        obj.getQuery("query"),
         obj.getString("listenerId")
       ).fix().map { tuple ->
         val query = tuple.a
@@ -65,7 +63,7 @@ object RNQuery {
       else -> Either.left("$tag is not RNQuery task")
     } }
 
-  private fun decode(obj: SafeReadableMap): Either<String, Query> =
+  fun decode(obj: SafeReadableMap): Either<String, Query> =
     RNSelect.decode(obj)
       .handleErrorWith { RNFrom.decode(obj) }
       .handleErrorWith { RNJoins.decode(obj) }
@@ -77,13 +75,13 @@ object RNQuery {
       .handleErrorWith { RNLimit.decodeOffset(obj) }
       .mapLeft { "invalid Query $it ${obj.map}" }
 
-  private fun writeResultSet(a: ResultSet): WritableMap {
+  private fun writeResultSet(resultSet: ResultSet): WritableMap {
     val builder = GsonBuilder()
     val defaultBuilder: Gson = builder.create()
 
     val array: WritableArray = WritableNativeArray()
 
-    for (result in a.allResults()) {
+    for (result in resultSet.allResults()) {
       var resultMap: WritableMap
       try {
         resultMap = ReactNativeJson.convertJsonToMap(JSONObject(defaultBuilder.toJson(result.toMap())))

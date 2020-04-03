@@ -10,8 +10,7 @@ object RNSelectResult {
     obj.tag.flatMap { tag -> when (tag) {
       "All" -> Either.right(SelectResult.all())
 
-      "Expression" -> obj.getMap("expression")
-        .flatMap { RNExpression.decode(it) }
+      "Expression" -> obj.getExpression("expression")
         .map { SelectResult.expression(it) }
 
       "Property" -> obj.getString("property")

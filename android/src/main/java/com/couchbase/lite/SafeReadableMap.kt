@@ -55,4 +55,6 @@ class SafeReadableMap(val map: ReadableMap) {
   fun getDataSource(name: String) = getMap(name).flatMap { RNDataSource.decode(it) }
 
   fun getExpression(name: String) = getMap(name).flatMap { RNExpression.decode(it) }
+
+  fun getQuery(name: String) = getMap(name).flatMap { RNQuery.decode(it) }
 }
