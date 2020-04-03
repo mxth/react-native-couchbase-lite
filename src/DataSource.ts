@@ -1,4 +1,5 @@
 import { Database } from './Database'
+import { pipe } from 'fp-ts/lib/pipeable'
 
 export type DataSource = DataSource.Init | DataSource.As
 
@@ -12,6 +13,13 @@ export namespace DataSource {
       tag: 'Init',
       database: Database.init(name)
     }
+  }
+
+  export function databaseAs(name: string): (alias: string) => As {
+    return alias => pipe(
+      database(name),
+      as(alias)
+    )
   }
 
   export interface As {

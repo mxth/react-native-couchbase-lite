@@ -31,6 +31,12 @@ export namespace SelectResult {
     return { tag: 'Property', property }
   }
 
+  export function propertyFrom(source: string): (property: string) => SelectResultExpression {
+    return property => SelectResult.expression(
+      Expression.propertyFrom(property)(source)
+    )
+  }
+
   export interface From {
     tag: 'From'
     alias: string

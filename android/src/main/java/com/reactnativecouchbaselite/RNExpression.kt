@@ -33,34 +33,61 @@ object RNExpression {
       "Number" -> obj.getNumber("value")
         .map { Expression.number(it) }
 
+      "String" -> obj.getString("value")
+        .map { Expression.string(it) }
+
       "From" -> obj.getString("alias")
         .flatMap { alias ->
           obj.getMap("expression").flatMap { expr ->
-            propertyExpression(expr)
-              .map { it.from(alias) }
+            propertyExpression(expr).map { it.from(alias) }
               .handleErrorWith {
-                metaExpression(expr)
-                  .map { it.from(alias) }
+                metaExpression(expr).map { it.from(alias) }
               }
           }
         }
-
-      "MetaFrom" -> Either.applicative<String>()
-        .tupled(
-          obj.getString("alias"),
-          obj.getMap("expression").flatMap { metaExpression(it) }
-        )
-        .fix()
-        .map { it.b.from(it.a) }
-
-      "String" -> obj.getString("value")
-        .map { Expression.string(it) }
 
       "Add" -> getBinaryOperands(obj).map { it.a.add(it.b) }
 
       "And" -> getBinaryOperands(obj).map { it.a.and(it.b) }
 
+      "Between" -> Either.applicative<String>()
+        .tupled(
+          obj.getMap("expression").flatMap { decode(it) },
+          obj.getMap("min").flatMap { decode(it) },
+          obj.getMap("max").flatMap { decode(it) }
+        )
+        .fix()
+        .map { it.a.between(it.a, it.b) }
+
+      "Divide" -> getBinaryOperands(obj).map { it.a.divide(it.b) }
+
       "EqualTo" -> getBinaryOperands(obj).map { it.a.equalTo(it.b) }
+
+      "GreaterThan" -> getBinaryOperands(obj).map { it.a.greaterThan(it.b) }
+
+      "GreaterThanOrEqualTo" -> getBinaryOperands(obj).map { it.a.greaterThanOrEqualTo(it.b) }
+
+      "IsNot" -> getBinaryOperands(obj).map { it.a.isNot(it.b) }
+
+      "IsNullOrMissing" ->obj.getExpression("expression").map { it.isNullOrMissing() }
+
+      "LessThan" -> getBinaryOperands(obj).map { it.a.lessThan(it.b) }
+
+      "LessThanOrEqualTo" -> getBinaryOperands(obj).map { it.a.lessThanOrEqualTo(it.b) }
+
+      "Like" -> getBinaryOperands(obj).map { it.a.like(it.b) }
+
+      "Modulo" -> getBinaryOperands(obj).map { it.a.modulo(it.b) }
+
+      "Multiply" -> getBinaryOperands(obj).map { it.a.multiply(it.b) }
+
+      "NotEqualTo" -> getBinaryOperands(obj).map { it.a.notEqualTo(it.b) }
+
+      "NotNullOrMissing" -> obj.getExpression("expression").map { it.notNullOrMissing() }
+
+      "Or" -> getBinaryOperands(obj).map { it.a.or(it.b) }
+
+      "Subtract" -> getBinaryOperands(obj).map { it.a.subtract(it.b) }
 
       else -> propertyExpression(obj)
         .handleErrorWith { metaExpression(obj) }

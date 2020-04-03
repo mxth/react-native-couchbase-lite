@@ -1,3 +1,6 @@
+import { pipe } from 'fp-ts/lib/pipeable'
+import { Expression } from './Expression'
+
 export type MetaExpression =
   | Meta.Deleted
   | Meta.Expiration
@@ -24,6 +27,12 @@ export namespace Meta {
   }
   export const id: Id = {
     tag: 'Meta.id'
+  }
+  export function idFrom(from: string): Expression.From {
+    return pipe(
+      Meta.id,
+      Expression.from(from)
+    )
   }
 
   export interface Sequence {

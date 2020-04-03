@@ -98,47 +98,40 @@ export default function App() {
     interruptLiveQuery.next()
   )
 
-  const complexQuery = () => pipe(
-    Query.select(
-      SelectResult.expression(pipe(
-        Expression.property('agentData'),
-        Expression.from('redemption')
-      )),
-      SelectResult.expression(pipe(
-        Expression.property('createdDate'),
-        Expression.from('point')
-      )),
-    ),
-    Query.from(pipe(
-      DataSource.database(config.database),
-      DataSource.as('redemption')
-    )),
-    Query.join(pipe(
-      Join.join(pipe(
-        DataSource.database(config.database),
-        DataSource.as('point')
-      )),
-      Join.on(pipe(
-        Meta.id,
-        Expression.from("redemption"),
-        Expression.equalTo(
-          pipe(
-            Expression.property('rewardId'),
-            Expression.from("point")
+  const complexQuery = () => {
+    const dataSourceAs = DataSource.databaseAs(config.database)
+    const redemptionAlias = 'redemption'
+    const pointAlias = 'point'
+    const propertyFromRedemption = Expression.propertyFrom(redemptionAlias)
+    const propertyFromPoint = Expression.propertyFrom(pointAlias)
+    pipe(
+      Query.select(
+        SelectResult.expression(propertyFromRedemption('agentData')),
+        SelectResult.expression(propertyFromPoint('createdDate'))
+      ),
+      Query.from(
+        dataSourceAs(redemptionAlias),
+      ),
+      Query.join(pipe(
+        Join.join(dataSourceAs(pointAlias)),
+        Join.on(
+          Expression.equal(
+            Meta.idFrom(redemptionAlias),
+            propertyFromPoint('rewardId'),
           )
         )
-      ))
-    )),
-    Query.where(pipe(
-      Expression.propertyFromEqual(['typekey', 'redemption'], 'Redemption'),
-      Expression.and(
-        Expression.propertyFromEqual(['idPrefix', 'point'], 'EarnPointHistory'),
-      )
-    )),
-    Query.limitWithOffset(1, 0),
-    Query.execute(t.unknown),
-    ExampleApp.run
-  )
+      )),
+      Query.where(
+        Expression.and(
+          Expression.equal(propertyFromRedemption('typekey'), 'Redemption'),
+          Expression.equal(propertyFromPoint('idPrefix'), 'EarnPointHistory')
+        )
+      ),
+      Query.limitWithOffset(1, 0),
+      Query.execute(t.unknown),
+      ExampleApp.run
+    )
+  }
 
   return (
     <View style={styles.container}>
